@@ -7,9 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		03D53A6EB4CBD1DB79221C3B /* test_public_source_audit.cpython-311.pyc in Resources */ = {isa = PBXBuildFile; fileRef = E3C7AA5FE474F2B0F4942712 /* test_public_source_audit.cpython-311.pyc */; };
 		05762BCDB5FE7A55013C6F45 /* ThemeBloomOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790AF48F39DD5343CBE881A6 /* ThemeBloomOverlayView.swift */; };
-		0654DC22E2501B4951A26BFE /* test_release_record.py in Resources */ = {isa = PBXBuildFile; fileRef = C2879217A8D520BEFF1A3DDF /* test_release_record.py */; };
 		079332B9FB6FBCB05DED167A /* AppLegalDocumentCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937C67F1563F730486A9FF73 /* AppLegalDocumentCatalog.swift */; };
 		09C9B971793E48829CB0AE27 /* ThemeCornerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB14414349ACA9D3CC7A3EF1 /* ThemeCornerView.swift */; };
 		1022BDD4FF31689CCB1D7759 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFABCFD1BEF385568B9BF4EA /* AppTheme.swift */; };
@@ -20,12 +18,10 @@
 		267156A6E7A017C36043F085 /* StemOutputPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514DDF6747AAA656DA623D24 /* StemOutputPanelView.swift */; };
 		26FA8CFBCE47AE6575D863D1 /* AppShellBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C850DEB51CE9BC2582008533 /* AppShellBackgroundView.swift */; };
 		2E8F9EBD2247BB97FF64B786 /* AudioInputPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F69CCF7DC596A0F6645684 /* AudioInputPanelView.swift */; };
-		3910642C845C2D3EEF352E14 /* test_dmg_configuration.cpython-311.pyc in Resources */ = {isa = PBXBuildFile; fileRef = 1D128C1D731A9BADF1C9C1AD /* test_dmg_configuration.cpython-311.pyc */; };
 		3A906241051D4C7BB2A140C0 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFABCFD1BEF385568B9BF4EA /* AppTheme.swift */; };
 		3C38562944EBA63FA339382E /* AppLegalDocumentModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D9A7F5D5AD7ED7F5B821C0 /* AppLegalDocumentModalView.swift */; };
 		3EFCCE1A6EE1AA500A1A3D29 /* DownloaderShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A902CECCB56A0CFC5F765095 /* DownloaderShellView.swift */; };
 		462EF1F16545FF2663D10DCB /* ExitPresenceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C5F0FC14EEB596CFD35706A /* ExitPresenceContainer.swift */; };
-		47694EAE294901DAFA05A8FB /* test_runtime_audit.cpython-311.pyc in Resources */ = {isa = PBXBuildFile; fileRef = 58A7FD0485CF42BE334EC59E /* test_runtime_audit.cpython-311.pyc */; };
 		57D2B1C5A1D0121DD02A53A3 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 12E4B448DB4E8BC14F677414 /* Sparkle */; };
 		59C828F49CB92F7339668CBF /* AppFooterSocialLinksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A99C697CF61726B7D2FD58 /* AppFooterSocialLinksView.swift */; };
 		59D94F741D41865300A5429D /* ResponsibleUseGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B768AE7006B4CB529434C08C /* ResponsibleUseGateView.swift */; };
@@ -41,16 +37,13 @@
 		97D36F89FE5A4AA02145F6C3 /* BrandColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6AB110765C0E0F0C6DE637D /* BrandColumnView.swift */; };
 		98BC8F19AE104061B96307DD /* StemWorkerProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD43994106677F3D6CB125F /* StemWorkerProcess.swift */; };
 		9EF466967D738FAC4D4A383C /* PrimaryDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931E25C7AB2E503C4C7B7F38 /* PrimaryDownloadButton.swift */; };
-		A27256EA0D32E91B1FFEDA4A /* test_dmg_configuration.py in Resources */ = {isa = PBXBuildFile; fileRef = C849E7230290D95F33F053E6 /* test_dmg_configuration.py */; };
 		A4DF94765451ED06D47A28F5 /* SeparationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EBCEF816BB66D8087F477F0 /* SeparationTests.swift */; };
-		B8294C121A3B3912013E8561 /* test_public_source_audit.py in Resources */ = {isa = PBXBuildFile; fileRef = 0889DCC446E7EA33D28849B6 /* test_public_source_audit.py */; };
 		BE8BE8D0EFB6553D9E062A0B /* BrandLogoMarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1114495D82EEFE3AE371DC0C /* BrandLogoMarkView.swift */; };
 		C7E5C7EDBEBA14A614EDEA2C /* AppSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF29846BB57854B5197B4DC6 /* AppSettingsStore.swift */; };
 		CB28B323DF2AD2EE948D870F /* TemplateAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A495096F093EFB5F1388071E /* TemplateAppApp.swift */; };
 		CF6C05F20F9C9DA7D4FF5432 /* StemOutputWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22AEB09AD89F72B589A455FF /* StemOutputWriter.swift */; };
 		CF9A9834C184BA2220E933DE /* THIRD_PARTY_NOTICES.md in Resources */ = {isa = PBXBuildFile; fileRef = BA37DFAF9DF0E85439EBCDDC /* THIRD_PARTY_NOTICES.md */; };
 		D06ACCCC0B57FB0DF3DD82E2 /* StemSeparatorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2DB81823889AB605EAA4F3 /* StemSeparatorUITests.swift */; };
-		D15967DA01EFAD36F01E11CD /* test_runtime_audit.py in Resources */ = {isa = PBXBuildFile; fileRef = D6F6262CCA5398A31AEE29A4 /* test_runtime_audit.py */; };
 		D3D254322EB36131FDFD3AA2 /* JobWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7CE1E833B57EED2E3F9076A /* JobWorkspace.swift */; };
 		D4A2744F9E40D63C6B47A48C /* TemplateShellState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD8870D221F963DF629A51E /* TemplateShellState.swift */; };
 		D502C1873CD34017FF4CE11F /* AudioPreparationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E359DB3ECC19E7BE70726171 /* AudioPreparationService.swift */; };
@@ -60,7 +53,6 @@
 		E34CA4598004450E720D0C00 /* TEMPLATE_APP_TERMS.md in Resources */ = {isa = PBXBuildFile; fileRef = 38777D240E2B653DE3FFEC2B /* TEMPLATE_APP_TERMS.md */; };
 		EDFDDE775ED9580F62B2CE6D /* AppFooterSurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6180375E919CB790A55A48B9 /* AppFooterSurfaceView.swift */; };
 		EE014BB44BA63077525A5B5C /* RuntimeLicenses in Resources */ = {isa = PBXBuildFile; fileRef = AC2242FF8BD32967600A8E2F /* RuntimeLicenses */; };
-		F9665FD5CBD1A819B58F13F3 /* test_release_record.cpython-311.pyc in Resources */ = {isa = PBXBuildFile; fileRef = 39619B8B13584C213BD8FA52 /* test_release_record.cpython-311.pyc */; };
 		F9FA9A2D132847D347E77062 /* ToneButtonOverlayRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608816B9CA6D3C149F1BECFE /* ToneButtonOverlayRenderer.swift */; };
 		FA2045B93575867BC2765391 /* SeparationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F04A64E6C2B0CA964E2C5708 /* SeparationStore.swift */; };
 /* End PBXBuildFile section */
@@ -85,11 +77,9 @@
 /* Begin PBXFileReference section */
 		00D9A7F5D5AD7ED7F5B821C0 /* AppLegalDocumentModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLegalDocumentModalView.swift; sourceTree = "<group>"; };
 		01ACF3C58AB8F12B87CF5924 /* TemplateApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TemplateApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		0889DCC446E7EA33D28849B6 /* test_public_source_audit.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_public_source_audit.py; sourceTree = "<group>"; };
 		0EBCEF816BB66D8087F477F0 /* SeparationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparationTests.swift; sourceTree = "<group>"; };
 		1114495D82EEFE3AE371DC0C /* BrandLogoMarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandLogoMarkView.swift; sourceTree = "<group>"; };
 		14E8F93D9F82F283040DB353 /* SecondaryActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondaryActionButton.swift; sourceTree = "<group>"; };
-		1D128C1D731A9BADF1C9C1AD /* test_dmg_configuration.cpython-311.pyc */ = {isa = PBXFileReference; path = "test_dmg_configuration.cpython-311.pyc"; sourceTree = "<group>"; };
 		22AEB09AD89F72B589A455FF /* StemOutputWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StemOutputWriter.swift; sourceTree = "<group>"; };
 		22F69CCF7DC596A0F6645684 /* AudioInputPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInputPanelView.swift; sourceTree = "<group>"; };
 		2420DFD2506EB9AB3A3D0802 /* TemplateButtonOverlayRenderer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TemplateButtonOverlayRenderer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,9 +90,7 @@
 		315B9AD9D6392BCCBFA0101A /* AppLifecycleCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleCoordinator.swift; sourceTree = "<group>"; };
 		38777D240E2B653DE3FFEC2B /* TEMPLATE_APP_TERMS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TEMPLATE_APP_TERMS.md; sourceTree = "<group>"; };
 		38DF6617A5BF2D77D15ADA0C /* AppCommandDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommandDispatcher.swift; sourceTree = "<group>"; };
-		39619B8B13584C213BD8FA52 /* test_release_record.cpython-311.pyc */ = {isa = PBXFileReference; path = "test_release_record.cpython-311.pyc"; sourceTree = "<group>"; };
 		514DDF6747AAA656DA623D24 /* StemOutputPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StemOutputPanelView.swift; sourceTree = "<group>"; };
-		58A7FD0485CF42BE334EC59E /* test_runtime_audit.cpython-311.pyc */ = {isa = PBXFileReference; path = "test_runtime_audit.cpython-311.pyc"; sourceTree = "<group>"; };
 		59B68645F3171630A3303F42 /* AppUpdateCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateCoordinator.swift; sourceTree = "<group>"; };
 		5C5F0FC14EEB596CFD35706A /* ExitPresenceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExitPresenceContainer.swift; sourceTree = "<group>"; };
 		608816B9CA6D3C149F1BECFE /* ToneButtonOverlayRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneButtonOverlayRenderer.swift; sourceTree = "<group>"; };
@@ -123,17 +111,13 @@
 		BD0439FB8DE83F9E0DE15060 /* TemplateFeaturePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateFeaturePanelView.swift; sourceTree = "<group>"; };
 		BF29846BB57854B5197B4DC6 /* AppSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsStore.swift; sourceTree = "<group>"; };
 		C1B0F324CD8C4E95D7431232 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		C2879217A8D520BEFF1A3DDF /* test_release_record.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_release_record.py; sourceTree = "<group>"; };
 		C4A99C697CF61726B7D2FD58 /* AppFooterSocialLinksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFooterSocialLinksView.swift; sourceTree = "<group>"; };
 		C7CE1E833B57EED2E3F9076A /* JobWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobWorkspace.swift; sourceTree = "<group>"; };
-		C849E7230290D95F33F053E6 /* test_dmg_configuration.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_dmg_configuration.py; sourceTree = "<group>"; };
 		C850DEB51CE9BC2582008533 /* AppShellBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShellBackgroundView.swift; sourceTree = "<group>"; };
-		D6F6262CCA5398A31AEE29A4 /* test_runtime_audit.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = test_runtime_audit.py; sourceTree = "<group>"; };
 		DF4C77DA53A94F52D1277BD4 /* ToneControlMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToneControlMotion.swift; sourceTree = "<group>"; };
 		DFABCFD1BEF385568B9BF4EA /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		E2B5F7AE21C9F91779DFBF9B /* JobControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobControl.swift; sourceTree = "<group>"; };
 		E359DB3ECC19E7BE70726171 /* AudioPreparationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPreparationService.swift; sourceTree = "<group>"; };
-		E3C7AA5FE474F2B0F4942712 /* test_public_source_audit.cpython-311.pyc */ = {isa = PBXFileReference; path = "test_public_source_audit.cpython-311.pyc"; sourceTree = "<group>"; };
 		E6AB110765C0E0F0C6DE637D /* BrandColumnView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandColumnView.swift; sourceTree = "<group>"; };
 		EB14414349ACA9D3CC7A3EF1 /* ThemeCornerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeCornerView.swift; sourceTree = "<group>"; };
 		F04A64E6C2B0CA964E2C5708 /* SeparationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparationStore.swift; sourceTree = "<group>"; };
@@ -203,17 +187,6 @@
 			path = UITests;
 			sourceTree = "<group>";
 		};
-		64F68FC37F13D96FC046630F /* __pycache__ */ = {
-			isa = PBXGroup;
-			children = (
-				1D128C1D731A9BADF1C9C1AD /* test_dmg_configuration.cpython-311.pyc */,
-				E3C7AA5FE474F2B0F4942712 /* test_public_source_audit.cpython-311.pyc */,
-				39619B8B13584C213BD8FA52 /* test_release_record.cpython-311.pyc */,
-				58A7FD0485CF42BE334EC59E /* test_runtime_audit.cpython-311.pyc */,
-			);
-			path = __pycache__;
-			sourceTree = "<group>";
-		};
 		65FD8D3E4B8D365E43F169FB /* Separation */ = {
 			isa = PBXGroup;
 			children = (
@@ -229,18 +202,6 @@
 				B39F52AA9F5412F3D0332999 /* ToneButtonOverlayRenderer */,
 			);
 			path = Tools;
-			sourceTree = "<group>";
-		};
-		9BD32E50303A63C168BC216A /* Release */ = {
-			isa = PBXGroup;
-			children = (
-				C849E7230290D95F33F053E6 /* test_dmg_configuration.py */,
-				0889DCC446E7EA33D28849B6 /* test_public_source_audit.py */,
-				C2879217A8D520BEFF1A3DDF /* test_release_record.py */,
-				D6F6262CCA5398A31AEE29A4 /* test_runtime_audit.py */,
-				64F68FC37F13D96FC046630F /* __pycache__ */,
-			);
-			path = Release;
 			sourceTree = "<group>";
 		};
 		9D6F2D2284C7FE044E37DBF9 /* docs */ = {
@@ -285,7 +246,6 @@
 			isa = PBXGroup;
 			children = (
 				0EBCEF816BB66D8087F477F0 /* SeparationTests.swift */,
-				9BD32E50303A63C168BC216A /* Release */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -412,7 +372,6 @@
 			buildConfigurationList = 027FCF1B150DA6B191EEA5D0 /* Build configuration list for PBXNativeTarget "StemSeparatorTests" */;
 			buildPhases = (
 				2D211577D27B1BD6C8794AF5 /* Sources */,
-				D6129F16BC932AB027FE3685 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -497,21 +456,6 @@
 				7AE0BDB154418FD9227CACD1 /* TEMPLATE_APP_PRIVACY.md in Resources */,
 				E34CA4598004450E720D0C00 /* TEMPLATE_APP_TERMS.md in Resources */,
 				CF9A9834C184BA2220E933DE /* THIRD_PARTY_NOTICES.md in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D6129F16BC932AB027FE3685 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3910642C845C2D3EEF352E14 /* test_dmg_configuration.cpython-311.pyc in Resources */,
-				A27256EA0D32E91B1FFEDA4A /* test_dmg_configuration.py in Resources */,
-				03D53A6EB4CBD1DB79221C3B /* test_public_source_audit.cpython-311.pyc in Resources */,
-				B8294C121A3B3912013E8561 /* test_public_source_audit.py in Resources */,
-				F9665FD5CBD1A819B58F13F3 /* test_release_record.cpython-311.pyc in Resources */,
-				0654DC22E2501B4951A26BFE /* test_release_record.py in Resources */,
-				47694EAE294901DAFA05A8FB /* test_runtime_audit.cpython-311.pyc in Resources */,
-				D15967DA01EFAD36F01E11CD /* test_runtime_audit.py in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
