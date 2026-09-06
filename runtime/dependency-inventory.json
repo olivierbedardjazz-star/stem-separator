@@ -257,7 +257,9 @@
     "name": "tqdm",
     "version": "4.70.0",
     "license": "MPL-2.0 AND MIT",
-    "licenseFiles": []
+    "licenseFiles": [
+      "RuntimeLicenses/tqdm/tqdm-4.70.0.dist-info__licenses__LICENCE"
+    ]
   },
   {
     "name": "treetable",

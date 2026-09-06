@@ -10,7 +10,7 @@ HTDemucs checkpoint 955717e8 is distributed under the historical MIT declaration
 
 Corresponding sources and library modification information are provided in RUNTIME_SOURCE_AND_RELINKING.md and the source archive alongside each release.
 
-Build dependencies are included in this inventory as well as runtime dependencies. Packaging does not imply that every listed package is executed. Native libraries may have additional notices in the complete texts. This inventory does not constitute completed public-release license clearance.
+Build dependencies are included in this inventory as well as runtime dependencies. Packaging does not imply that every listed package is executed. Native libraries may have additional notices in the complete texts. See RUNTIME_SOURCE_AND_RELINKING.md for source availability and library modification information.
 
 altgraph 0.17.5 — MIT
 antlr4-python3-runtime 4.9.3 — BSD

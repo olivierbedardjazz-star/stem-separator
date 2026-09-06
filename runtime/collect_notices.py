@@ -10,7 +10,7 @@ for dist in sorted(metadata.distributions(),key=lambda d:d.metadata['Name'].lowe
     name=dist.metadata['Name']; version=dist.version
     files=[]
     for file in dist.files or []:
-        if any(t in file.name.lower() for t in ('license','copying','notice','copyright')):
+        if any(t in file.name.lower() for t in ('license','licence','copying','notice','copyright')):
             source=Path(dist.locate_file(file))
             if source.is_file():
                 target=out/name/str(file).replace('../','').replace('/','__')
@@ -24,7 +24,7 @@ lines=['# Stem Separator Third-Party Notices','', 'Bundled software and model at
 'Demucs 4.0.1 code is MIT licensed. Model htdemucs checkpoint 955717e8-8726e21a.th comes from https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/955717e8-8726e21a.th . SHA-256: 8726e21a993978c7ba086d3872e7608d7d5bfca646ca4aca459ffda844faa8b4.', '',
 'HTDemucs checkpoint 955717e8 is distributed under the historical MIT declaration at https://huggingface.co/adefossez/HTDemucs/blob/bf35a81b663819a8255c8fefee17f9d812b786b5/README.md . Copyright (c) Meta Platforms, Inc. and affiliates. The complete MIT notice is included as HTDemucs-MIT.txt.', '',
 'Corresponding sources and library modification information are provided in RUNTIME_SOURCE_AND_RELINKING.md and the source archive alongside each release.', '',
-'Build dependencies are included in this inventory as well as runtime dependencies. Packaging does not imply that every listed package is executed. Native libraries may have additional notices in the complete texts. This inventory does not constitute completed public-release license clearance.', '']
+'Build dependencies are included in this inventory as well as runtime dependencies. Packaging does not imply that every listed package is executed. Native libraries may have additional notices in the complete texts. See RUNTIME_SOURCE_AND_RELINKING.md for source availability and library modification information.', '']
 for i in items:
     lines.append(i['name']+' '+i['version']+' — '+i['license'].split('\n')[0][:160])
 lines+=['','Sparkle: pinned revision 79bc9e872948e47877e76f194cb0c8e0412b0b90, MIT. See included Sparkle-LICENSE.txt.','', 'To inspect full notices, use Show Package Contents on Stem Separator.app, then Contents/Resources/RuntimeLicenses.']
