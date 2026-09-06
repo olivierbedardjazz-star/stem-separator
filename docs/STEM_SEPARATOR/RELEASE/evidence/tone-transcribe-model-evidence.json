@@ -1,0 +1,28 @@
+{
+  "reviewedAt": "2026-09-06",
+  "inspection": "read-only mounted installers; no app or model execution",
+  "artifacts": [
+    {
+      "installer": "Tone-Transcribe-0.1.0-alpha.11-arm64.dmg",
+      "manifestGeneratedAt": "2026-08-16T21:59:09.066Z",
+      "checkpoint": "955717e8-8726e21a.th",
+      "verifiedSHA256": "8726e21a993978c7ba086d3872e7608d7d5bfca646ca4aca459ffda844faa8b4",
+      "manifestSHA256": "8647e895036423b4c89bef4af84802188fcd8e231396b13f01f90d3dc9e6ede0",
+      "noticesSHA256": "8f4c93f083598491ef5b420197f79b9b9ee27b25c074fe995aa8878183d5e843",
+      "noticesModelReviewStillOpen": true
+    },
+    {
+      "installer": "Tone-Transcribe-0.1.0-alpha.13-arm64.dmg",
+      "manifestGeneratedAt": "2026-08-17T02:08:00.182Z",
+      "checkpoint": "955717e8-8726e21a.th",
+      "verifiedSHA256": "8726e21a993978c7ba086d3872e7608d7d5bfca646ca4aca459ffda844faa8b4",
+      "manifestSHA256": "c10c92e4def42e270fd2b0e866470a3b68978682140ebd8545a8302b77c18782",
+      "noticesSHA256": "8f4c93f083598491ef5b420197f79b9b9ee27b25c074fe995aa8878183d5e843",
+      "noticesModelReviewStillOpen": true
+    }
+  ],
+  "relatedSourceRepository": "/Users/oliviergrenierbedard/Desktop/My_Musical_Brain/Transcribe_Score",
+  "sourceEvidenceCommit": "4a02a0e3",
+  "commitDate": "2026-08-15T13:20:05-04:00",
+  "finding": "Earlier possession is supported by local build and Git records. Model hash is identical to Stem Separator. Reviewed model provenance and licence documents do not contain a separate model redistribution grant; their model review remains open. Local dates are supporting records, not independently authenticated acquisition dates."
+}

@@ -1,0 +1,121 @@
+name: TemplateApp
+options:
+  createIntermediateGroups: true
+  developmentLanguage: en
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    revision: 79bc9e872948e47877e76f194cb0c8e0412b0b90
+settings:
+  base:
+    CURRENT_PROJECT_VERSION: 100
+    MARKETING_VERSION: 0.1.0
+    TEMPLATE_APP_SPARKLE_APPCAST_URL: https://github.com/olivierbedardjazz-star/stem-separator/releases/latest/download/appcast.xml
+    TEMPLATE_APP_SPARKLE_PUBLIC_ED_KEY: DwuDwRpfMXxvkOnzf97LB5K+bNKfu1f03kCPTMtAjSw=
+    SWIFT_VERSION: 6.0
+    ARCHS: arm64
+    ONLY_ACTIVE_ARCH: YES
+targets:
+  TemplateApp:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: TemplateApp
+        excludes:
+          - App/AppDownloadIntake.swift
+          - App/ProductionDebugLogger.swift
+          - Download/**
+          - Runtime/**
+          - RuntimeDependencies/**
+          - UI/Components/DownloadCompletionDialog.swift
+          - UI/Components/DownloadLanePanelView.swift
+          - UI/Components/DownloadStatusToast.swift
+          - UI/Components/DownloadURLSlotField.swift
+      - path: docs/LEGAL
+        excludes:
+          - RuntimeLicenses/**
+        buildPhase: resources
+      - path: docs/LEGAL/RuntimeLicenses
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        CODE_SIGNING_ALLOWED: NO
+        INFOPLIST_FILE: TemplateApp/Info.plist
+        SKIP_INSTALL: NO
+        PRODUCT_BUNDLE_IDENTIFIER: com.oliviergrenierbedard.stemseparator
+        PRODUCT_NAME: Stem Separator
+        PRODUCT_MODULE_NAME: TemplateApp
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        SWIFT_EMIT_LOC_STRINGS: NO
+      configs:
+        Release:
+          ENABLE_HARDENED_RUNTIME: YES
+    postBuildScripts:
+      - name: Embed bundled separation runtime
+        script: '"$SRCROOT/scripts/embed_stem_runtime.sh"'
+        basedOnDependencyAnalysis: false
+    dependencies:
+      - package: Sparkle
+  StemSeparatorUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: UITests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+        PRODUCT_BUNDLE_IDENTIFIER: com.oliviergrenierbedard.stemseparator.uitests
+        TEST_TARGET_NAME: TemplateApp
+    dependencies:
+      - target: TemplateApp
+  StemSeparatorTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tests
+        excludes:
+          - Fixtures/**
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+        PRODUCT_BUNDLE_IDENTIFIER: com.oliviergrenierbedard.stemseparator.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Stem Separator.app/Contents/MacOS/Stem Separator"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+    dependencies:
+      - target: TemplateApp
+  TemplateButtonOverlayRenderer:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tools/ToneButtonOverlayRenderer
+      - path: TemplateApp/Shared/AppTheme.swift
+      - path: TemplateApp/UI/Components/ToneControlMotion.swift
+      - path: TemplateApp/UI/Components/PrimaryDownloadButton.swift
+    settings:
+      base:
+        CODE_SIGNING_ALLOWED: NO
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.oliviergrenierbedard.templateapp.buttonoverlayrenderer
+        PRODUCT_NAME: TemplateButtonOverlayRenderer
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        SWIFT_EMIT_LOC_STRINGS: NO
+schemes:
+  TemplateApp:
+    build:
+      targets:
+        TemplateApp: all
+    test:
+      targets:
+        - StemSeparatorTests
+        - StemSeparatorUITests
+  TemplateButtonOverlayRenderer:
+    build:
+      targets:
+        TemplateButtonOverlayRenderer: all

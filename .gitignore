@@ -1,0 +1,36 @@
+# Local builds, downloaded runtimes and models are recreated by pinned build scripts.
+build/
+DerivedData*/
+.runtime-build/
+runtime/models/*.th
+*.xcuserstate
+xcuserdata/
+.DS_Store
+*.dmg
+*.xcarchive
+*.zip
+
+# Private release state and credentials
+release-evidence/
+.venv-packaging/
+__pycache__/
+*.pyc
+*.p12
+*.pfx
+*.key
+*.pem
+*.xcresult
+.env
+.env.*
+
+# Template reference code is retained locally, never compiled or published.
+archive/
+TemplateApp/Download/
+TemplateApp/Runtime/
+TemplateApp/RuntimeDependencies/
+TemplateApp/App/AppDownloadIntake.swift
+TemplateApp/App/ProductionDebugLogger.swift
+TemplateApp/UI/Components/DownloadCompletionDialog.swift
+TemplateApp/UI/Components/DownloadLanePanelView.swift
+TemplateApp/UI/Components/DownloadStatusToast.swift
+TemplateApp/UI/Components/DownloadURLSlotField.swift

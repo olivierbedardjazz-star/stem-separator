@@ -1,0 +1,15 @@
+{
+  "date": "2026-09-06",
+  "status": "pre-release-execution",
+  "files": {
+    "project.yml": "b906557404b83c75ed42607d7009134feeea8ea22ea0aa6d10ebfddfebcb2daa",
+    "TemplateApp/Info.plist": "8668a8b704ddd6064b74d1f3c565d65e30e83cc8da6e0947c7f2d39ab88b0d71",
+    "TemplateApp/Shared/AppTheme.swift": "470c1d674855a8d712a5c3b22b922a68e172da418085a77b6b952f385382764f",
+    "TemplateApp/UI/Components/PrimaryDownloadButton.swift": "38cf72d408f52af05e7e47dc91580bb31999c462e97ddc0f2afff61e0ff83750",
+    "TemplateApp/UI/Components/ToneControlMotion.swift": "84f74d932b2409602befe5ff4e387408f637607cafa99d253e8b5903f99c8ce1",
+    "TemplateApp/UI/Components/AppFooterSocialLinksView.swift": "faeb750b55f6325fdcec02b943927c2242b466d06bc14a4066eb52ffba9bb1c6",
+    "runtime/worker/stem_worker.py": "52b9d6c2d1fe50d578d2c1621d5ba713e0f2d5494c15f19827db41cc2288ec85",
+    "runtime/provenance.json": "cb1657fb5ce2d36967261dcd8c1102c93516eda41509482029046a0fa037bab4",
+    "runtime/requirements-lock.txt": "b9036cf537b3ad3709e9b814f23b5eb9723ead80a5b104a648651eb2aeb8c8b0"
+  }
+}

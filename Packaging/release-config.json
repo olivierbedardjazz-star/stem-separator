@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "productName": "Stem Separator",
+  "appName": "Stem Separator.app",
+  "bundleID": "com.oliviergrenierbedard.stemseparator",
+  "helperBundleID": "com.oliviergrenierbedard.stemseparator.worker",
+  "project": "TemplateApp.xcodeproj",
+  "scheme": "TemplateApp",
+  "repository": "olivierbedardjazz-star/stem-separator",
+  "feedURL": "https://github.com/olivierbedardjazz-star/stem-separator/releases/latest/download/appcast.xml",
+  "artifactStem": "Stem-Separator",
+  "architecture": "arm64",
+  "minimumOS": "14.0",
+  "teamID": "5SVUWU2ZGY",
+  "signingIdentity": "Developer ID Application: Olivier Grenier Bedard (5SVUWU2ZGY)",
+  "notaryProfile": "notary-profile",
+  "sparkleAccount": "stem-separator-ed25519"
+}

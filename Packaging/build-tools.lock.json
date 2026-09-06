@@ -1,0 +1,13 @@
+{
+  "xcodegen": {
+    "version": "2.46.0",
+    "url": "https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip",
+    "sha256": "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806"
+  },
+  "localXcode": "26.3 (17C529)",
+  "ciXcode": {
+    "macos-14": "16.2",
+    "macos-26": "26.3"
+  },
+  "sparkleRevision": "79bc9e872948e47877e76f194cb0c8e0412b0b90"
+}

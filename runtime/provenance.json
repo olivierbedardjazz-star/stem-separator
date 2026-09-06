@@ -1,0 +1,30 @@
+{
+  "releaseStatus": "release-preparation",
+  "model": {
+    "id": "htdemucs",
+    "filename": "955717e8-8726e21a.th",
+    "url": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/955717e8-8726e21a.th",
+    "sha256": "8726e21a993978c7ba086d3872e7608d7d5bfca646ca4aca459ffda844faa8b4",
+    "redistributionClearance": "Owner assessed and authorized redistribution under historical July 2026 MIT declaration on 2026-09-06",
+    "license": "MIT",
+    "licenseEvidence": "https://huggingface.co/adefossez/HTDemucs/blob/bf35a81b663819a8255c8fefee17f9d812b786b5/README.md"
+  },
+  "python": {
+    "version": "3.11.16",
+    "distribution": "astral-sh/python-build-standalone",
+    "release": "20260901",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260901/cpython-3.11.16%2B20260901-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "sha256": "768f05cf200273bbdda9a5955a5a6892a4b22f2a0b1e4b0a9160f5c7fce86816"
+  },
+  "inference": {
+    "device": "cpu",
+    "threads": 4,
+    "shifts": 0,
+    "segmentSeconds": 7.8,
+    "overlap": 0.25,
+    "jobs": 1
+  },
+  "sourceCode": "runtime/worker/stem_worker.py",
+  "packageVersions": "runtime/requirements-lock.txt",
+  "notices": "docs/LEGAL/THIRD_PARTY_NOTICES.md"
+}
