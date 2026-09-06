@@ -1,0 +1,38 @@
+name: Clean macOS build
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-offline-proof:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14
+            xcode: '16.2'
+          - runner: macos-26
+            xcode: '26.3'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Reconstruct and prove offline runtime and native app
+        run: scripts/ci_clean_proof.sh
+      - name: Retain diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: proof-${{ matrix.runner }}-${{ github.sha }}
+          path: build/CIProof/logs/
+          retention-days: 7
