@@ -1,6 +1,6 @@
 # Slice 378 — Provisional signed DMG installation before Apple
 
-Status: pending. Depends on: 377. Outcome: the frozen signed candidate survives the intended Finder install route and works from Applications before notarization.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 377. Outcome: the frozen signed candidate survives the intended Finder install route and works from Applications before notarization.
 
 ## Exact file work
 

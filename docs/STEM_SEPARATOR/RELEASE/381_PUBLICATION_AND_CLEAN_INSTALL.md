@@ -1,6 +1,6 @@
 # Slice 381 — Publish exact artifacts and test the download
 
-Status: pending. Depends on: 380. Outcome: the public repository serves complete verified assets and a user can install the real download normally.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 380. Outcome: the public repository serves complete verified assets and a user can install the real download normally.
 
 ## Exact file work
 

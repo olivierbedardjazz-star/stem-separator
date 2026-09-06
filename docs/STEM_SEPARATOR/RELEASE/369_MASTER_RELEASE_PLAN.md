@@ -1,6 +1,9 @@
 # Stem Separator — single-repository release plan
 
-Prepared 2026-09-06. **Execution authorized and underway.**
+> Execution completed for the public 0.1.1 release. Use the [current checklist](RELEASE_CHECKLIST.md), [acceptance evidence](evidence/release-acceptance.md), and [maintenance guide](RELEASING.md). The specification below preserves the planning snapshot and is superseded by those execution records where implementation or coverage differs.
+
+
+Prepared 2026-09-06. **Release execution completed; historical planning snapshot follows.**
 
 Current order override: owner explicitly requires a complete local bundled Release and signed installation proof before any GitHub build. Local signing/installation therefore precede public source/CI; accepted exact-source CI remains required before Apple submission/publication.
 

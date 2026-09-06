@@ -1,6 +1,6 @@
 # Slice 374 — Local Debug, Release and failure proof
 
-Status: pending. Depends on: 371–373. Outcome: the configured candidate works through native UI and runtime paths on this Mac before any public binary release.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 371–373. Outcome: the configured candidate works through native UI and runtime paths on this Mac before any public binary release.
 
 ## Exact file work
 

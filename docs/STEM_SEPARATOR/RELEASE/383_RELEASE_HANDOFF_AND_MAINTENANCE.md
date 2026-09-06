@@ -1,6 +1,6 @@
 # Slice 383 — Evidence, handoff and repeatable maintenance
 
-Status: pending. Depends on: 382. Outcome: a release can be audited and repeated without rediscovering local state or losing update continuity.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 382. Outcome: a release can be audited and repeated without rediscovering local state or losing update continuity.
 
 ## Exact file work
 

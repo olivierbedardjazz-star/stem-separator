@@ -19,3 +19,5 @@ Private keys remain in the local Keychain. No model download or system Python is
 The pinned Sparkle generator signs both ZIP and feed. `verify_sparkle_signatures.swift` verifies both signatures with the public key embedded in the app; it never accesses private signing material. The stable latest feed must match the uploaded signed bytes.
 
 Read-only handoff status: `build/StemRuntime/portable-venv/bin/python scripts/release_status.py release-evidence/<version>-<build> --complete`. Final completion requires downloaded-installer and real update evidence as well as notarized assets. Full records remain local; publish sanitized summaries only.
+
+Completed release evidence and current test limits: [acceptance](../docs/STEM_SEPARATOR/RELEASE/evidence/release-acceptance.md). Detailed maintenance commands: [RELEASING](../docs/STEM_SEPARATOR/RELEASE/RELEASING.md).

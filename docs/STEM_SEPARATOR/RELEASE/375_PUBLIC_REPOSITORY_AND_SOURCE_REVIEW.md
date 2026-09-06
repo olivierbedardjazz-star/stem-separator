@@ -1,6 +1,6 @@
 # Slice 375 — One public repository and reviewed source
 
-Status: pending. Depends on: 370, 374. Author the 376 workflow before the first push. Outcome: a deliberate public source tree with a matching remote, no secrets and no accidental binary publication.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 370, 374. Author the 376 workflow before the first push. Outcome: a deliberate public source tree with a matching remote, no secrets and no accidental binary publication.
 
 ## Exact file work
 

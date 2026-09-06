@@ -1,6 +1,6 @@
 # Slice 376 — Exact-commit GitHub clean build
 
-Status: pending. Depends on: 375 for remote execution; author before first push. Outcome: independently reproducible source-to-working-app evidence on native arm64 GitHub-hosted hardware, without local signing credentials.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 375 for remote execution; author before first push. Outcome: independently reproducible source-to-working-app evidence on native arm64 GitHub-hosted hardware, without local signing credentials.
 
 ## Exact file work
 

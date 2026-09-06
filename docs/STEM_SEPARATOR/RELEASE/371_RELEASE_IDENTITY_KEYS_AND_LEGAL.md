@@ -1,6 +1,6 @@
 # Slice 371 — Stable identity, local keys and legal surfaces
 
-Status: pending. Depends on: 370; production licence wording depends on its conclusion. Outcome: one permanent identity and one trusted update channel with credentials kept on this Mac.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 370; production licence wording depends on its conclusion. Outcome: one permanent identity and one trusted update channel with credentials kept on this Mac.
 
 ## Exact file work
 

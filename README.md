@@ -10,6 +10,8 @@ Drop or choose audio, click **Separate Stems**, choose where to save, and reveal
 
 [Download the latest signed and notarized installer](https://github.com/olivierbedardjazz-star/stem-separator/releases/latest). Open the DMG and drag Stem Separator to Applications. The ZIP and signed appcast serve the built-in Sparkle updater; you do not need to download them.
 
+[Release checks and remaining coverage](docs/STEM_SEPARATOR/RELEASE/RELEASE_CHECKLIST.md) include clean macOS builds, public installer verification, Apple acceptance and a real two-version update.
+
 ## Build
 
 Use an Apple Silicon Mac with Xcode. The local reference toolchain is Xcode 26.3; build tools and runtime downloads are pinned in `Packaging/build-tools.lock.json` and `runtime/artifacts-lock.json`.

@@ -1,6 +1,6 @@
 # Slice 377 — Nested Developer ID signing and execution
 
-Status: pending. Depends on: 370 rights cleared for distribution, 374, 376. Outcome: the exact candidate has valid signatures throughout and the signed helper actually runs with hardened runtime.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 370 rights cleared for distribution, 374, 376. Outcome: the exact candidate has valid signatures throughout and the signed helper actually runs with hardened runtime.
 
 ## Exact file work
 

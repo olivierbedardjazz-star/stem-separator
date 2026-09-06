@@ -1,6 +1,6 @@
 # Slice 372 — Reproducible runtime and build-tool closure
 
-Status: pending. Depends on: 370. Outcome: a fresh arm64 builder reconstructs the complete offline worker from verified inputs, preserving a signable bundle layout.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 370. Outcome: a fresh arm64 builder reconstructs the complete offline worker from verified inputs, preserving a signable bundle layout.
 
 ## Exact file work
 

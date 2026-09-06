@@ -1,6 +1,6 @@
 # Slice 382 — Real installed A → B Sparkle proof
 
-Status: pending. Depends on: 381 for A; repeat candidate gates for B. Outcome: an installed older app securely updates itself and still separates audio afterward.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 381 for A; repeat candidate gates for B. Outcome: an installed older app securely updates itself and still separates audio afterward.
 
 ## Exact file work
 

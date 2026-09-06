@@ -1,6 +1,6 @@
 # Slice 373 — Release configuration and artifact handoffs
 
-Status: pending. Depends on: 371–372. Outcome: every release command acts on explicitly identified inputs and refuses stale or mismatched artifacts.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 371–372. Outcome: every release command acts on explicitly identified inputs and refuses stale or mismatched artifacts.
 
 ## Exact file work
 

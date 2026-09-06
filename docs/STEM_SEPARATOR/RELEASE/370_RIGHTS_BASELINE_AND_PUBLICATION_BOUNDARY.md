@@ -1,6 +1,6 @@
 # Slice 370 — Rights, baseline and public-source boundary
 
-Status: pending. Depends on: none. Outcome: a measured starting point and explicit permission/compliance record for every material that would become public. Source visibility and model-binary distribution are assessed separately.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: none. Outcome: a measured starting point and explicit permission/compliance record for every material that would become public. Source visibility and model-binary distribution are assessed separately.
 
 ## Exact file work
 

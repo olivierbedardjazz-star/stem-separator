@@ -1,6 +1,6 @@
 # Slice 380 — Final DMG, update ZIP and signed feed
 
-Status: pending. Depends on: 379. Outcome: an exact, complete set of distributable artifacts made from the stapled app without rebuilding it.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 379. Outcome: an exact, complete set of distributable artifacts made from the stapled app without rebuilding it.
 
 ## Exact file work
 

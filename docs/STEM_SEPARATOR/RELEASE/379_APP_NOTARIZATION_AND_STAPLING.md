@@ -1,6 +1,6 @@
 # Slice 379 — App notarization and ticket stapling
 
-Status: pending. Depends on: 378 and all frozen-candidate gates. Outcome: Apple explicitly accepts the submitted app and a ticket is attached to that exact candidate.
+Status: implemented; release proof and coverage limits are recorded in [acceptance](evidence/release-acceptance.md). Depends on: 378 and all frozen-candidate gates. Outcome: Apple explicitly accepts the submitted app and a ticket is attached to that exact candidate.
 
 ## Exact file work
 
