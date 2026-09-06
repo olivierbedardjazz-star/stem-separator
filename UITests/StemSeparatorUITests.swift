@@ -78,8 +78,12 @@ final class StemSeparatorUITests: XCTestCase {
         app.menuBars.menuBarItems["Help"].click()
         app.menuBars.menuItems["Check for Updates..."].click()
         XCTAssertTrue(app.staticTexts["You’re up to date!"].waitForExistence(timeout: 30))
-        app.buttons["OK"].click()
+        app.dialogs.buttons["OK"].firstMatch.click()
         XCTAssertTrue(app.buttons["Choose Audio"].isEnabled)
+        if ProcessInfo.processInfo.environment["STEM_TEST_PREPARE_UPDATE"] == "1" {
+            app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Jazz Virtuoso")).firstMatch.click()
+            app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Cosmic Composer")).firstMatch.click()
+        }
         app.terminate()
     }
     func testInstalledSparkleUpdate() throws {
@@ -92,10 +96,10 @@ final class StemSeparatorUITests: XCTestCase {
         app.launch()
         app.menuBars.menuBarItems["Help"].click()
         app.menuBars.menuItems["Check for Updates..."].click()
-        let install = app.buttons["Install Update"]
+        let install = app.buttons["Install Update"].firstMatch
         XCTAssertTrue(install.waitForExistence(timeout: 30))
         install.click()
-        let relaunch = app.buttons["Install and Relaunch"]
+        let relaunch = app.buttons["Install and Relaunch"].firstMatch
         XCTAssertTrue(relaunch.waitForExistence(timeout: 300))
         relaunch.click()
         let info = URL(fileURLWithPath: path).appendingPathComponent("Contents/Info.plist")
