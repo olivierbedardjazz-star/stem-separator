@@ -69,4 +69,32 @@ final class StemSeparatorUITests: XCTestCase {
         let done = XCTAttachment(screenshot: app.windows.firstMatch.screenshot()); done.name = "Completed branded workflow"; done.lifetime = .keepAlways; add(done)
         app.terminate()
     }
+    func testInstalledSparkleUpdate() throws {
+        guard let path = ProcessInfo.processInfo.environment["STEM_UPDATE_APP"],
+              let expected = ProcessInfo.processInfo.environment["STEM_UPDATE_BUILD"] else {
+            throw XCTSkip("Requires an installed signed predecessor and a published successor")
+        }
+        continueAfterFailure = false
+        let app = XCUIApplication(url: URL(fileURLWithPath: path))
+        app.launch()
+        app.menuBars.menuBarItems["Help"].click()
+        app.menuBars.menuItems["Check for Updates..."].click()
+        let install = app.buttons["Install Update"]
+        XCTAssertTrue(install.waitForExistence(timeout: 30))
+        install.click()
+        let relaunch = app.buttons["Install and Relaunch"]
+        XCTAssertTrue(relaunch.waitForExistence(timeout: 300))
+        relaunch.click()
+        let info = URL(fileURLWithPath: path).appendingPathComponent("Contents/Info.plist")
+        let updated = NSPredicate { _, _ in
+            guard let bytes = try? Data(contentsOf: info),
+                  let plist = try? PropertyListSerialization.propertyList(from: bytes, format: nil) as? [String: Any] else { return false }
+            return plist["CFBundleVersion"] as? String == expected
+        }
+        expectation(for: updated, evaluatedWith: nil)
+        waitForExpectations(timeout: 90)
+        XCTAssertTrue(app.buttons["Choose Audio"].waitForExistence(timeout: 30))
+        app.terminate()
+    }
+
 }

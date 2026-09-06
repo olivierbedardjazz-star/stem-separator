@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "artifacts": [
+    {
+      "filename": "gcc-11.3.0.tar.gz",
+      "url": "https://ftp.gnu.org/gnu/gcc/gcc-11.3.0/gcc-11.3.0.tar.gz",
+      "sha256": "98438e6cc7294298b474cf0da7655d9a8c8b796421bb0210531c294a950374ed"
+    },
+    {
+      "filename": "gfortran-recipe-481738c.tar.gz",
+      "url": "https://codeload.github.com/conda-forge/gfortran_impl_osx-64-feedstock/tar.gz/481738c977ef7b651105c9715ad2255c613500df",
+      "sha256": "0222e9b5011bfbb0a6d99cd3cdfdd4bbb3bb6a17c8cb17b601b638cd33ce6c20"
+    },
+    {
+      "url": "https://files.pythonhosted.org/packages/21/3b/6c24bec5be5e743ffd99576daa5cc077722fc7d5bbc00bd133fa0c698dc6/tqdm-4.70.0.tar.gz",
+      "sha256": "55b0b0dbd97462d06ebee91e4dac24ed4d4702be82b24f07e6c1d27e08cea220",
+      "filename": "tqdm-4.70.0.tar.gz"
+    }
+  ]
+}

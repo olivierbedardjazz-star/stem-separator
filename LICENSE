@@ -9,3 +9,7 @@ Third-party components and their notices retain their own licences. This
 statement does not restrict rights granted by those licences, including MIT
 rights in Demucs and the historically licensed HTDemucs model. See
  docs/LEGAL/THIRD_PARTY_NOTICES.md and docs/LEGAL/RuntimeLicenses/.
+
+You may modify LGPL-covered components for your own use and reverse engineer
+the combined work to debug those modifications, as required by their licences.
+Those permissions take precedence over conflicting application restrictions.
