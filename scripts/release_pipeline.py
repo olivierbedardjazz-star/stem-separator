@@ -154,17 +154,17 @@ class Release:
         self.run(binpath/'generate_appcast',staging,'--account',CONFIG['sparkleAccount'],'--maximum-deltas','0',
                  '--download-url-prefix',f"https://github.com/{CONFIG['repository']}/releases/download/{self.tag}/")
         self.run('cp',staging/'appcast.xml',self.assets/'appcast.xml')
-        # Explicitly sign the feed as required by SURequireSignedFeed, even when
-        # the generator version also signs it automatically.
-        self.run(binpath/'sign_update','--account',CONFIG['sparkleAccount'],self.assets/'appcast.xml')
+        # The pinned generator signs both feed and archive. Verification uses only
+        # the embedded public key and never requests a second Keychain authorization.
         tree=ET.parse(self.assets/'appcast.xml');enclosures=tree.findall('.//enclosure')
         if len(enclosures)!=1 or enclosures[0].get('url')!=f"https://github.com/{CONFIG['repository']}/releases/download/{self.tag}/{archive.name}":
             raise RuntimeError('Unexpected update enclosure')
         if int(enclosures[0].get('length','0'))!=archive.stat().st_size:raise RuntimeError('Incorrect update length')
         for path in [archive,self.assets/'appcast.xml']:self.record(path.name,path)
         self.run(sys.executable,ROOT/'scripts/prepare_corresponding_sources.py',self.assets/'Corresponding-Sources.tar.gz')
-        self.run(binpath/'sign_update','--account',CONFIG['sparkleAccount'],'--verify',self.assets/'appcast.xml')
-        self.run(binpath/'sign_update','--account',CONFIG['sparkleAccount'],'--verify',archive,enclosures[0].get('{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature'))
+        verifier=ROOT/'build/verify-sparkle-signatures'
+        self.run('swiftc',ROOT/'scripts/verify_sparkle_signatures.swift','-o',verifier)
+        self.run(verifier,self.assets/'appcast.xml',archive,self.app/'Contents/Info.plist',enclosures[0].get('url'))
         checksums=''.join(f'{fingerprint(p)}  {p.name}\n' for p in sorted(self.assets.iterdir()) if p.is_file())
         (self.assets/'SHA256SUMS.txt').write_text(checksums)
         self.record('assets',self.assets)
@@ -185,6 +185,9 @@ class Release:
             url=f'https://github.com/{repo}/releases/download/{self.tag}/{path.name}'
             self.run('curl','--fail','--location','--retry','5',url,'-o',downloaded/path.name)
             if fingerprint(path)!=fingerprint(downloaded/path.name):raise RuntimeError('Published asset bytes mismatch')
+        stable=downloaded/'latest-appcast.xml'
+        self.run('curl','--fail','--location','--retry','5',CONFIG['feedURL'],'-o',stable)
+        if fingerprint(stable)!=fingerprint(self.assets/'appcast.xml'):raise RuntimeError('Stable feed does not match published feed')
         self.record('published',self.assets,url=f'https://github.com/{repo}/releases/tag/{self.tag}')
 
 def main():

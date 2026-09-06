@@ -8,8 +8,8 @@ packages:
     revision: 79bc9e872948e47877e76f194cb0c8e0412b0b90
 settings:
   base:
-    CURRENT_PROJECT_VERSION: 100
-    MARKETING_VERSION: 0.1.0
+    CURRENT_PROJECT_VERSION: 101
+    MARKETING_VERSION: 0.1.1
     TEMPLATE_APP_SPARKLE_APPCAST_URL: https://github.com/olivierbedardjazz-star/stem-separator/releases/latest/download/appcast.xml
     TEMPLATE_APP_SPARKLE_PUBLIC_ED_KEY: DwuDwRpfMXxvkOnzf97LB5K+bNKfu1f03kCPTMtAjSw=
     SWIFT_VERSION: 6.0

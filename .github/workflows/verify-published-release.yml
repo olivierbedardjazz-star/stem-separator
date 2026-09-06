@@ -1,0 +1,33 @@
+name: Verify published installer
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Immutable published release tag
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  installed-offline-proof:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-14, macos-26]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Download, assess and run the installed app
+        run: scripts/verify_published_installer.sh
+      - name: Keep proof logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: installed-${{ matrix.runner }}-${{ inputs.tag }}
+          path: build/PublishedProof/logs/
+          retention-days: 7

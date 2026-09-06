@@ -8,7 +8,7 @@ Drop or choose audio, click **Separate Stems**, choose where to save, and reveal
 
 ## Release status
 
-Release preparation is underway. No production download is published yet. The first-install artifact will be a signed/notarized DMG under this repository's Releases. ZIP and appcast assets serve the built-in Sparkle updater.
+[Download the latest signed and notarized installer](https://github.com/olivierbedardjazz-star/stem-separator/releases/latest). Open the DMG and drag Stem Separator to Applications. The ZIP and signed appcast serve the built-in Sparkle updater; you do not need to download them.
 
 ## Build
 

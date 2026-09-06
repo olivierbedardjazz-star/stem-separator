@@ -69,6 +69,19 @@ final class StemSeparatorUITests: XCTestCase {
         let done = XCTAttachment(screenshot: app.windows.firstMatch.screenshot()); done.name = "Completed branded workflow"; done.lifetime = .keepAlways; add(done)
         app.terminate()
     }
+    func testInstalledAppReportsUpToDate() throws {
+        guard let path = ProcessInfo.processInfo.environment["STEM_TEST_APP"] else {
+            throw XCTSkip("Requires the installed current public release")
+        }
+        let app = XCUIApplication(url: URL(fileURLWithPath: path))
+        app.launch()
+        app.menuBars.menuBarItems["Help"].click()
+        app.menuBars.menuItems["Check for Updates..."].click()
+        XCTAssertTrue(app.staticTexts["You’re up to date!"].waitForExistence(timeout: 30))
+        app.buttons["OK"].click()
+        XCTAssertTrue(app.buttons["Choose Audio"].isEnabled)
+        app.terminate()
+    }
     func testInstalledSparkleUpdate() throws {
         guard let path = ProcessInfo.processInfo.environment["STEM_UPDATE_APP"],
               let expected = ProcessInfo.processInfo.environment["STEM_UPDATE_BUILD"] else {
