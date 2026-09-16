@@ -33,3 +33,7 @@ Keep app archives, accepted app/DMG, ZIP, signed appcast, source archive, checks
 A failed published version is corrected forward with a higher version/build and repeated gates. Preserve immutable prior release assets. Do not assume transparent downgrade or key rotation works with signature-before-extraction enabled. Review pinned Sparkle's key-recovery requirements before any intentional key change.
 
 Full evidence remains local in this workspace; no separate backup destination was configured. Private signing material stays in Keychain. Do not remove user audio, results, or unrelated applications while cleaning test artifacts. Copies under `release-evidence/UpdaterProof` and each version's `Installed Applications` are test-owned and explicitly identified.
+
+## 0.1.2 maintenance notes
+
+Use the exact target/class/method selector, e.g. `-only-testing:StemSeparatorUITests/StemSeparatorUITests/testInstalledSparkleUpdate`. A green xcodebuild result with zero executed tests is not proof; inspect xcresult counts. If old LocalRelease tools were cleaned, pass `SPARKLE_BIN_DIR="$PWD/build/DistributionDerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin"` to `scripts/prepare_sparkle_release.sh`. The published-installer workflow uses its built-in read-only token for release metadata only, avoiding shared-IP API rate limits; asset downloads remain anonymous. No repository signing secret is needed.

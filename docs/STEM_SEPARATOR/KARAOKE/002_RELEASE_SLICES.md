@@ -19,3 +19,7 @@ Outcome: accepted app and DMG, stapled tickets, Gatekeeper pass, signed Sparkle 
 
 ## Slice 6 — Publication and updater
 Outcome: new public release, anonymous asset hash verification, downloaded/quarantined installer proof on both hosted OS versions, actual 0.1.1→0.1.2 Sparkle install/relaunch and post-update stem/karaoke workflow. Use a fresh copy of the predecessor in a new test directory; preserve predecessor archive, preferences and user data. Files: release pipeline/status scripts, UI tests, sanitized acceptance report. Stop on missing update, OS minimum mismatch, changed bytes, installation/signature/test failure. Do not mark complete until evidence exists. Retain final candidate and metrics; no modification of prior handoff artifacts.
+
+## Execution status — completed
+
+All six slices passed. See [version-specific acceptance and measured results](../RELEASE/evidence/release-0.1.2-acceptance.md). `release_status.py --complete` reports PASS. The only post-publication correction was to verification/test infrastructure (anonymous API rate limit and disposable test-journal cleanup); published app/DMG/ZIP/feed bytes stayed immutable.

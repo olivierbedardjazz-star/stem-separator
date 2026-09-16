@@ -1,23 +1,23 @@
 # Stem Separator — architecture and future-agent guide
 
-**Implementation reference, inspected September 6, 2026.** The sections below describe the shipped 0.1.1 baseline. Working source is now a local 0.1.2/102 MPS candidate: read [the implementation delta](STEM_SEPARATOR/PERFORMANCE/003_MPS_IMPLEMENTATION.md) first for changed runtime, protocol, OS floor and test gates. Current released application: **0.1.1 / build 101**. This document describes the existing code, not a proposed rewrite. App source for that release is commit `8a0c90bdc9c06ac1646c4169b6bf58cc67f6615a`; later documentation commits do not change its signed bytes.
+**Current release: 0.1.2 / build 102**, verified September 15, 2026. App source is `1f0bdbdc451dcc955fd4c9b8a5f47b24b10a713a`; later verification/test/documentation commits do not alter shipped bytes. Read [MPS implementation](STEM_SEPARATOR/PERFORMANCE/003_MPS_IMPLEMENTATION.md), [karaoke and release slices](STEM_SEPARATOR/KARAOKE/002_RELEASE_SLICES.md), and [completed acceptance](STEM_SEPARATOR/RELEASE/evidence/release-0.1.2-acceptance.md). Historical release details below are labeled where retained.
 
 ## 1. Start here and preserve these decisions
 
-Read this guide, [current release checklist](STEM_SEPARATOR/RELEASE/RELEASE_CHECKLIST.md), [actual acceptance evidence](STEM_SEPARATOR/RELEASE/evidence/release-acceptance.md), and [release maintenance](STEM_SEPARATOR/RELEASE/RELEASING.md) before changing the app. [Master release plan](STEM_SEPARATOR/RELEASE/369_MASTER_RELEASE_PLAN.md) and numbered slices preserve rationale; their proposed file lists are superseded where the implementation consolidated work. The former architecture README is preserved as [historical template reference](STEM_SEPARATOR/REFERENCE_TEMPLATE_ARCHITECTURE.md).
+Read this guide, [current release checklist](STEM_SEPARATOR/RELEASE/RELEASE_CHECKLIST.md), [actual acceptance evidence](STEM_SEPARATOR/RELEASE/evidence/release-0.1.2-acceptance.md), and [release maintenance](STEM_SEPARATOR/RELEASE/RELEASING.md) before changing the app. [Master release plan](STEM_SEPARATOR/RELEASE/369_MASTER_RELEASE_PLAN.md) and numbered slices preserve rationale; their proposed file lists are superseded where the implementation consolidated work. The former architecture README is retained locally as `STEM_SEPARATOR/REFERENCE_TEMPLATE_ARCHITECTURE.md`; it is not a public build input.
 
 Settled product boundaries:
 
-- Native macOS SwiftUI/AppKit app, Apple Silicon, macOS 14+, free. No HTML/CSS/Electron wrapper.
+- Native macOS SwiftUI/AppKit app, Apple Silicon, macOS 15.1+, free. No HTML/CSS/Electron wrapper.
 - One selected audio file and one active job. No persistent input library or multi-job queue.
-- Bundled CPython/PyInstaller worker, Demucs 4.0.1 and one HTDemucs four-stem checkpoint; CPU inference. No first-run model download and no user-installed Python, Homebrew, ffmpeg or command-line tools.
-- Native input decoding and WAV output in Swift. Four outputs only: vocals, drums, bass, other. “🎁 Surprise” changes the fourth UI label, not its protocol identifier or `other.wav` filename.
+- Bundled CPython/PyInstaller worker, Demucs 4.0.1 and one HTDemucs four-stem checkpoint; MPS inference with explicit CPU spectral transforms. No first-run model download and no user-installed Python, Homebrew, ffmpeg or command-line tools.
+- Native input decoding and WAV output in Swift. Stem mode exports vocals, drums, bass, other; karaoke mode exports one summed non-vocal WAV. “🎁 Surprise” changes the fourth UI label, not its protocol identifier or `other.wav` filename.
 - Keep the exact shared themes, typography, primary-button halo/bloom/press motion, footer/social/banner placement and legal modal behavior. Reuse the existing primitives directly.
 - Keep minimal native menus: no Window/View, no Edit > Select All noise; updates live under Help.
 - Single public GitHub source/releases repository; Developer ID, notarization and Sparkle signing on the owner's Mac. No signing secrets in GitHub Actions.
 - Complete local bundled Release and signed installation/UI proof **before** pushing a candidate for clean GitHub builds. Both clean build jobs must pass for that exact source before Apple submission.
 
-The current external handoff is `../STEM_SEPARATOR-RELEASE`: the unchanged `.app`, DMG, Sparkle ZIP, signed appcast, corresponding-source archive, checksums and handoff README. Its “V1” label means the first completed product generation; the real version remains 0.1.1. Never silently relabel or rebuild already published bytes.
+The preserved older external handoff is `../STEM_SEPARATOR-RELEASE`: the unchanged `.app`, DMG, Sparkle ZIP, signed appcast, corresponding-source archive, checksums and handoff README. Its “V1” label means the first completed product generation; the real version remains 0.1.1. Current 0.1.2 artifacts are in `release-evidence/0.1.2-102/`. Never silently relabel or rebuild already published bytes.
 
 ## 2. Repository map and build authority
 
@@ -70,7 +70,7 @@ flowchart TD
 
 `TemplateAppApp.swift` creates a single SwiftUI Window and a `@StateObject AppEnvironment`, installs `AppDelegate`, and chooses ResponsibleUseGateView or RootView according to settings. The delegate handles initial window framing, app termination and resilient native menu cleanup.
 
-`AppEnvironment` constructs settings, one store and the command dispatcher, derives `isAuthorized` from responsible-use acceptance, gives `AppLifecycleCoordinator` a weak store reference, and starts `JobWorkspace.recover()` in a utility detached task. Combine forwards settings changes and updates authorization on the main actor.
+`AppEnvironment` constructs settings, one store and the command dispatcher, derives `isAuthorized` from responsible-use acceptance, gives `AppLifecycleCoordinator` a weak store reference, and invokes store cleanup recovery on launch and disk-mount notifications using a utility detached task. Combine forwards settings changes and updates authorization on the main actor.
 
 `SeparationStore`, `AppCommandDispatcher`, `AppSettingsStore`, `AppUpdateCoordinator` and lifecycle/UI state belong to `@MainActor`. Metadata inspection and a complete synchronous `SeparationSession.run` execute in detached user-initiated tasks. Worker pipe reads, AVFoundation conversion and WAV writes must never move onto the UI actor.
 
@@ -111,13 +111,13 @@ The worker receives decoded raw PCM in a fixed format, never an arbitrary audio 
 
 ## 6. Session, free space and workspace lifecycle
 
-`SeparationSession.run` obtains a JobWorkspace lease and scoped destination access. It verifies the destination is a directory, checks available important-usage capacity when supplied by the filesystem, and tries creating/removing an owned probe directory. The estimate is `durationSeconds * 44100 * 64 + 512 MiB`. This is a destination-volume preflight estimate, not a guarantee of free space on every volume or an exhaustive low-space test; runtime I/O errors still need safe handling.
+`SeparationSession.run` obtains a JobWorkspace lease and scoped destination access. It verifies the destination is a directory, checks available important-usage capacity when supplied by the filesystem, and tries creating/removing an owned probe directory. The estimate is `durationSeconds * 44100 * 64 + 512 MiB`. This estimate is independently checked on destination and temporary volumes; availability can still change during processing, so runtime I/O errors still need safe handling.
 
-Order: workspace → destination checks → `.preparing` → native conversion → worker → `.writing` → StemOutputWriter commit → return final folder. The lease stays alive throughout and removes private working files on deinitialization.
+Order: workspace → destination checks → `.preparing` → native conversion → worker → `.writing` → StemOutputWriter commit → return final folder (stems) or file (karaoke). The lease stays alive throughout and removes private working files on deinitialization.
 
 `JobWorkspace.root` is `FileManager.default.temporaryDirectory/StemSeparatorJobs`, not a hard-coded /tmp or Application Support directory. Each job uses a UUID directory with mode 0700, `.owner = StemSeparatorJob-v1`, and a mode-0600 `.lock` opened with O_NOFOLLOW and held using exclusive nonblocking flock. A second app instance must not sweep a live job.
 
-Recovery examines only UUID-named, non-symlink directories with the exact owner marker and an obtainable lock. If a job recorded destination staging, recovery resolves its bookmark without UI, rejects stale bookmarks, validates the `.stem-separator-<UUID>` name and matching owner marker, and deletes only that owned staging directory. It then removes the abandoned job directory. Unmarked directories and live locks are skipped. Inaccessible/stale destination staging may remain; do not broaden cleanup to guessed folder names or user output directories.
+Recovery uses durable metadata-only journals in Application Support/CleanupRecovery as well as legacy temporary records. Journal and workspace locks protect live jobs; UUID, non-symlink and ownership checks protect unrelated data. It resolves the destination bookmark without UI, validates the staging name/owner, removes payload before ownership markers, and retains the durable record on any failure or unavailable destination. Local temporary audio is removed independently. Temporary-directory purging no longer loses output cleanup records. Pending cleanup is visible in the store/UI and retried on launch, disk mount and the next job. Never broaden deletion to guessed folders or final user outputs.
 
 ## 7. Subprocess boundary and JSON protocol
 
@@ -129,7 +129,7 @@ Stem Separator.app/Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker
 
 It uses Foundation Process with an executable URL, not a shell command. Working directory is the private job directory. The environment is explicitly limited to PATH `/usr/bin:/bin`, job HOME/TMPDIR, PYTHONNOUSERSITE=1, OMP_NUM_THREADS=4 and PYTORCH_ENABLE_MPS_FALLBACK=0. Stdout carries protocol; stderr drains concurrently and is discarded by the Swift bridge. There is a 45-second ready-handshake watchdog and a 10,800-second total worker watchdog. Stdout records must be newline terminated and smaller than 65,536 bytes. Protocol/JSON failure stops the worker, waits for exit/drain, then returns a sanitized failure.
 
-Handshake is `{"protocolVersion":1,"type":"ready",...}` without jobID. Swift sends one request after ready:
+Handshake is `{"protocolVersion":1,"type":"ready","device":"mps",...}` without jobID. Swift sends one request after ready:
 
 ```json
 {
@@ -147,7 +147,8 @@ Handshake is `{"protocolVersion":1,"type":"ready",...}` without jobID. Swift sen
   },
   "outputDirectory": "/private-job/worker-output",
   "modelID": "htdemucs",
-  "device": "cpu"
+  "device": "mps",
+  "outputMode": "stems"
 }
 ```
 
@@ -157,8 +158,8 @@ Paths here are protocol examples, not hard-coded application locations. Every su
 | --- | --- |
 | `stage` | Recognized SeparationStage raw value; indeterminate UI. Normal worker stages are loadingModel and writing. |
 | `progress` | Integer `totalUnits` >0 and `completedUnits` between 0 and total; fraction = completedUnits/totalUnits. Worker emits `stage: separating`; Swift routes every valid progress event to `.separating`. |
-| `result` | Exact input frame count, stereo/44100/float32-le/interleaved, exactly four distinct known stem names; each `stems` entry has `name`, `file: name.f32le`, and `byteCount: frames*8`. |
-| `error` | modelIntegrity gets a specific reinstall error; other codes get generic engine-failure copy. |
+| `result` | Exact input frame count, stereo/44100/float32-le/interleaved, matching `outputMode`, device `mps`, and exactly the expected names (four stems or only `karaoke`); each `stems` entry has `name`, `file: name.f32le`, and `byteCount: frames*8`. |
+| `error` | modelIntegrity gets a specific reinstall error; mpsUnavailable explains GPU/macOS requirements; other codes get generic engine-failure copy. |
 
 Swift rejects further events after result, wrong job/sequence, unknown event type, incomplete final line and nonzero/abnormal process exit. Success needs both a valid result and exit 0. Raw file sizes and sample finiteness are checked again by the output writer; trusting the JSON alone is insufficient.
 
@@ -178,11 +179,11 @@ Checkpoint `955717e8-8726e21a.th` has SHA-256:
 
 The worker locates it relative to PyInstaller's `_MEIPASS`, verifies the full hash **before** torch.load(weights_only=False), and verifies model sources are vocals/drums/bass/other. Do not accept arbitrary external pickle checkpoints or change this hash independently of provenance, build download verification and model assessment.
 
-Runtime: CPython 3.11.16 (Astral python-build-standalone 20260901), Demucs 4.0.1, torch/torchaudio 2.5.1, NumPy 1.26.4, PyInstaller 6.16.0. Exact package artifacts/hashes live in the lock files; this prose is not a substitute for them.
+Runtime: CPython 3.11.16 (Astral python-build-standalone 20260901), Demucs 4.0.1, torch/torchaudio 2.6.0, NumPy 1.26.4, PyInstaller 6.16.0. Exact package artifacts/hashes live in the lock files; this prose is not a substitute for them.
 
-Inference sets up to four torch threads, one interop thread and seed 0. Input becomes a `[2,frames]` tensor. It validates finite samples, computes a mono reference mean/std using unbiased=False, normalizes with epsilon 1e-8, and applies the model under inference_mode with CPU, shifts=0, segment=7.8 seconds, split=True, overlap=0.25, num_workers=0. A custom ProgressPool executes deferred chunks and emits after each completed chunk. Total is `ceil(frames / int(0.75 * int(44100 * 7.8)))`; 14 seconds gives 3 chunks, 180 gives 31. Result is denormalized, required to be finite and shape `[4,2,frames]`, and written as four interleaved little-endian float32 files in model source order.
+Inference sets up to four torch threads, one interop thread and seed 0. Input becomes a `[2,frames]` tensor. It validates finite samples, computes a mono reference mean/std using unbiased=False, normalizes with epsilon 1e-8, and applies the model under inference_mode with MPS (no implicit CPU fallback), shifts=0, segment=7.8 seconds, split=True, overlap=0.25, num_workers=0. A custom ProgressPool executes deferred chunks and synchronizes MPS before emitting each completed chunk. Total is `ceil(frames / int(0.75 * int(44100 * 7.8)))`; 14 seconds gives 3 chunks, 180 gives 31. Result is denormalized, required to be finite and shape `[4,2,frames]`, and either written as four interleaved little-endian float32 files or summed by explicit drums/bass/other source names into the sole karaoke float32 file. Vocals are never serialized in karaoke mode.
 
-Worker exit codes: 0 success; 10 invalid request/input; 20 model identity/integrity/source mismatch; 30 invalid output/unhandled worker failure; 130 explicit cancel/parent EOF. Unhandled exceptions emit a generic workerFailure event and only the exception class on stderr. App SIGTERM/SIGKILL cancellation is separate from these voluntary exit codes.
+Worker exit codes: 0 success; 10 invalid request/input; 20 model identity/integrity/source mismatch; 21 unavailable MPS/macOS; 30 invalid output/unhandled worker failure; 130 explicit cancel/parent EOF. Unhandled exceptions emit a generic workerFailure event and only the exception class on stderr. App SIGTERM/SIGKILL cancellation is separate from these voluntary exit codes.
 
 ## 9. Transactional output and naming
 
@@ -218,7 +219,7 @@ Preference domain is the permanent bundle ID `com.oliviergrenierbedard.stemsepar
 | `stem-separator.v1.responsible-use-version` | AppSettingsStore integer; current required version 1. Old template acceptance is not reused. |
 | `stem-separator.v1.output-bookmark` | SeparationStore Data; resolve security scope without UI on startup; discard invalid/stale value. Only picker starting location, never implicit permission to start a job. |
 
-Selection, result, current job, progress and errors are in memory. Temporary staging.json includes a destination bookmark and must stay private. Sparkle maintains its own preferences/cache. Never export real bookmark content or user filenames into public issue/CI logs. Migration must preserve the domain and stable keys unless a deliberate tested migration is added.
+Selection, result, current job, progress and errors are in memory. Durable staging.json includes a destination bookmark and must stay private; it contains no audio. Sparkle maintains its own preferences/cache. Never export real bookmark content or user filenames into public issue/CI logs. Migration must preserve the domain and stable keys unless a deliberate tested migration is added.
 
 SeparationSession logs OSLog subsystem `com.oliviergrenierbedard.stemseparator`, category `separation`: start, elapsed completion seconds, and failure phase plus a whitelisted Cocoa/POSIX/OSStatus domain and numeric code. It never logs localizedDescription/userInfo. Swift discards worker stderr. The protocol necessarily carries private temp paths locally; that does not authorize public logging of requests. There is no audio upload, account, payment or analytics. Update checks and clicked external links use the network. Network denial is explicit in the offline test harness, not an OS network sandbox entitlement on the shipping app.
 
@@ -285,7 +286,7 @@ Required sequence:
 
 Pipeline phases: archive, sign, provisional-dmg, install-proof, notarize-app, staple-app, final-dmg, notarize-dmg, staple-dmg, sparkle, publish. `export_release_app.sh` and `finalize_exported_app_for_notarization.sh` both dispatch sign: do not run them as two independent sequential signing phases. The CLI refuses conflicting existing candidates/releases. Notarization supports submit-once/status-query; publication is not a general automatic recovery engine for partial drafts. Inspect a failed draft and verified bytes before resuming.
 
-Published assets: DMG for first installation; ZIP+signed appcast for Sparkle; Corresponding-Sources.tar.gz and SHA256SUMS.txt. The separate `.app` in the local handoff is a copy of the stapled app, not an extra GitHub installer. Final source tag remains 8a0c90b… even when later documentation changes main. Future product changes require a new version/build and renewed gates, never replacement assets behind v0.1.1 URLs.
+Published assets: DMG for first installation; ZIP+signed appcast for Sparkle; Corresponding-Sources.tar.gz and SHA256SUMS.txt. The separate `.app` in the local handoff is a copy of the stapled app, not an extra GitHub installer. Final 0.1.2 source tag remains 1f0bdbd… even when later verification/documentation changes main. Future product changes require a new version/build and renewed gates, never replacement assets behind any existing release URLs.
 
 ## 14. Build/test commands and diagnosis
 
@@ -319,9 +320,9 @@ Production troubleshooting order: confirm exact app path/build → verify signat
 
 ## 15. Known proof limits and safe future changes
 
-Completed evidence includes local signed UI before remote builds, exact-source macOS14/26 clean builds, notarized/stapled app and DMG, public installed binary checks, real 0.1.0→0.1.1 update, preserved settings/files and post-update separation. A three-minute synthetic run on M1 Max/64 GiB completed 31 chunks in 79.61s; this is not a quality score, minimum-RAM specification or all-device performance guarantee.
+Completed 0.1.2 evidence includes signed local UI before remote builds, exact-source macOS15/26 clean builds with actual MPS inference, notarized/stapled app and DMG, public downloaded/quarantined binary checks, real 0.1.1→0.1.2 update, preserved settings/files and post-update stems/karaoke. Synthetic 10/20-minute tests and signed 20-minute karaoke passed; 20-minute peak sampled process memory was approximately 7.8 GiB on a 64 GiB Mac. See the version-specific acceptance report for exact times and limitations.
 
-Recorded follow-ups: human browser/Finder drag into /Applications and a fresh account/second physical Mac GUI session; broader low-memory/external/iCloud/long-track testing; independent secure backup and key continuity; development-only repeated Debug-loader investigation. Automated copy/quarantine/Gatekeeper and native UI proof must not be relabeled as all of those human scenarios. See the actual checklist before claiming every proposed slice assertion was tested.
+Remaining coverage: real vocal-music listening, lower-memory physical Macs, broader iCloud cases, human Finder-drag/fresh-account workflows, independent secure backup/key continuity. Automated installation/Gatekeeper/UI proof is not a claim that those additional scenarios were performed.
 
 Change routing:
 
