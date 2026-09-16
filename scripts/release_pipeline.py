@@ -83,6 +83,7 @@ class Release:
         worker=self.app/'Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker'
         for test in ('test_worker.py','test_worker_control.py'):
             command([sys.executable,ROOT/'runtime'/test,worker],env=self.environment,timeout=300)
+        command([sys.executable,ROOT/'runtime/test_worker.py',worker,'--karaoke'],env=self.environment,timeout=300)
         self.record('signed',archiveRecord=fingerprint(self.root/'archived.json'))
     def dmg(self,provisional=False):
         self.require('signed' if provisional else 'app-stapled')
@@ -105,6 +106,7 @@ class Release:
         self.run('codesign','--verify','--deep','--strict',installed)
         if fingerprint(installed)!=fingerprint(self.app):raise RuntimeError('Installed app differs from candidate')
         command([sys.executable,ROOT/'runtime/test_worker.py',installed/'Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker'],timeout=300)
+        command([sys.executable,ROOT/'runtime/test_worker.py',installed/'Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker','--karaoke'],timeout=300)
         self.run('open','-n',installed)
         self.record('provisional-installed',scope='Mounted DMG, copied app to isolated installation directory, verified signature/bytes, offline inference and requested UI launch. Not Finder drag-and-drop or a second physical Mac.')
     def require_ci(self):
@@ -118,7 +120,10 @@ class Release:
         self.require_ci()
         app_kind=kind=='app'
         if app_kind:
-            self.require('provisional-installed');artifact=self.root/'notary-submission.zip'
+            self.require('provisional-installed')
+            local=json.loads((self.root/'local-ui-proof.json').read_text())
+            if local.get('signedInstalledWorkflow')!='passed':raise RuntimeError('Signed installed native UI proof required')
+            artifact=self.root/'notary-submission.zip'
             if not artifact.exists():self.run('ditto','-c','-k','--keepParent','--sequesterRsrc',self.app,artifact)
         else:
             artifact=self.assets/(self.base+'.dmg');self.require('final-dmg',artifact)
@@ -177,7 +182,7 @@ class Release:
         existing=subprocess.run(['gh','release','view',self.tag,'--repo',repo],capture_output=True)
         if existing.returncode==0:raise RuntimeError('Release exists; never overwrite published bytes')
         notes=self.root/'release-notes.md'
-        notes.write_text(f'''Stem Separator {self.version}\n\nFree offline four-stem separation for Apple Silicon Macs running macOS 14 or later.\n\nDownload **{self.base}.dmg**, open it, and drag Stem Separator to Applications. Python and the model are included. Choose an audio file, click Separate Stems, and select your output folder.\n\nThe ZIP and appcast are used by the built-in updater. Third-party notices are available from Help.\n''')
+        notes.write_text(f'''Stem Separator {self.version}\n\nFree offline four-stem separation and karaoke creation, accelerated by MPS, for Apple Silicon Macs running macOS 15.1 or later.\n\nDownload **{self.base}.dmg**, open it, and drag Stem Separator to Applications. Python and the model are included. Choose an audio file, click Separate Stems or Create Karaoke, and select your output folder. Karaoke saves one accompaniment WAV without writing individual vocal or stem files.\n\nThe ZIP and appcast are used by the built-in updater. Third-party notices are available from Help.\n''')
         self.run('gh','release','create',self.tag,*sorted(self.assets.iterdir()),'--draft','--repo',repo,'--target',sha,'--title',f'Stem Separator {self.version}','--notes-file',notes)
         self.run('gh','release','edit',self.tag,'--repo',repo,'--draft=false','--latest')
         downloaded=self.root/'downloaded';downloaded.mkdir(exist_ok=True)

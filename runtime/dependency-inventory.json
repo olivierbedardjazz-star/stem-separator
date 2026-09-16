@@ -238,19 +238,19 @@
   },
   {
     "name": "torch",
-    "version": "2.5.1",
+    "version": "2.6.0",
     "license": "BSD-3-Clause",
     "licenseFiles": [
-      "RuntimeLicenses/torch/torch-2.5.1.dist-info__LICENSE",
-      "RuntimeLicenses/torch/torch-2.5.1.dist-info__NOTICE"
+      "RuntimeLicenses/torch/torch-2.6.0.dist-info__LICENSE",
+      "RuntimeLicenses/torch/torch-2.6.0.dist-info__NOTICE"
     ]
   },
   {
     "name": "torchaudio",
-    "version": "2.5.1",
+    "version": "2.6.0",
     "license": "Not declared",
     "licenseFiles": [
-      "RuntimeLicenses/torchaudio/torchaudio-2.5.1.dist-info__LICENSE"
+      "RuntimeLicenses/torchaudio/torchaudio-2.6.0.dist-info__LICENSE"
     ]
   },
   {

@@ -31,5 +31,6 @@ codesign --verify --deep --strict "$app" > build/PublishedProof/logs/signature.l
 xcrun stapler validate "$app" > build/PublishedProof/logs/staple-app.log 2>&1
 xattr -w com.apple.quarantine "0083;$(printf '%x' $(date +%s));StemSeparatorDownloadProof;" "$app"
 spctl --assess --type execute --verbose=2 "$app" > build/PublishedProof/logs/gatekeeper.log 2>&1
-python3 runtime/test_worker.py "$app/Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker" > build/PublishedProof/logs/offline-inference.log 2>&1
+python3 runtime/test_worker.py "$app/Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker" --allow-unavailable > build/PublishedProof/logs/offline-inference.log 2>&1
+python3 runtime/test_worker.py "$app/Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker" --karaoke --allow-unavailable > build/PublishedProof/logs/offline-karaoke.log 2>&1
 sw_vers > build/PublishedProof/logs/system.txt

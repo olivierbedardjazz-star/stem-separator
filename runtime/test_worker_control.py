@@ -10,7 +10,7 @@ for mode in ('cancel','parentEOF','invalid'):
         job=str(uuid.uuid4())
         request=dict(protocolVersion=1,type='separate',jobID=job,
                      input=dict(path=str(src),frames=0 if mode=='invalid' else 44100,channels=2,sampleRate=44100,layout='interleaved',sampleType='float32-le',byteCount=44100*8),
-                     outputDirectory=str(root/'out'),modelID='htdemucs',device='cpu')
+                     outputDirectory=str(root/'out'),modelID='htdemucs',device='mps')
         p.stdin.write(json.dumps(request)+'\n');p.stdin.flush()
         if mode!='invalid':
             assert json.loads(p.stdout.readline())['stage']=='loadingModel'

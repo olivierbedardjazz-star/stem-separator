@@ -10,7 +10,7 @@
   "feedURL": "https://github.com/olivierbedardjazz-star/stem-separator/releases/latest/download/appcast.xml",
   "artifactStem": "Stem-Separator",
   "architecture": "arm64",
-  "minimumOS": "14.0",
+  "minimumOS": "15.1",
   "teamID": "5SVUWU2ZGY",
   "signingIdentity": "Developer ID Application: Olivier Grenier Bedard (5SVUWU2ZGY)",
   "notaryProfile": "notary-profile",

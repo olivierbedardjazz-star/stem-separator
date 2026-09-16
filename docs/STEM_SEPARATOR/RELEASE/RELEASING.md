@@ -1,6 +1,6 @@
 # Releasing Stem Separator
 
-The app is free, native SwiftUI, Apple Silicon only, macOS 14+. One public repository holds reviewed source and release assets. Signing and notarization run on the owner's Mac. GitHub Actions builds and verifies independently with read-only permissions and no Apple/Sparkle secrets.
+The app is free, native SwiftUI, Apple Silicon only, macOS 15.1+ for 0.1.2 and later (0.1.1 supports macOS 14). One public repository holds reviewed source and release assets. Signing and notarization run on the owner's Mac. GitHub Actions builds and verifies independently with read-only permissions and no Apple/Sparkle secrets.
 
 ## Stable identity
 

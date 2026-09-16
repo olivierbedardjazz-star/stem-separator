@@ -3,7 +3,7 @@ import OSLog
 
 struct SeparationSession: Sendable {
     let worker: StemWorkerProcess
-    func run(selection: AudioSelection, destination: URL, jobID: UUID, control: JobControl,
+    func run(selection: AudioSelection, destination: URL, jobID: UUID, control: JobControl, mode: SeparationMode = .stems,
              progress: @escaping @Sendable (SeparationStage, Double?) -> Void) throws -> URL {
         let log = Logger(subsystem: "com.oliviergrenierbedard.stemseparator", category: "separation")
         let start = Date()
@@ -22,6 +22,10 @@ struct SeparationSession: Sendable {
             if let available = values.volumeAvailableCapacityForImportantUsage, available < required {
                 throw SeparationFailure(message: "There is not enough free space in the output location. Free some space or choose another disk.")
             }
+            let temporaryCapacity = try workspace.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+            if let available = temporaryCapacity.volumeAvailableCapacityForImportantUsage, available < required {
+                throw SeparationFailure(message: "There is not enough temporary space on your Mac. Free some space before processing.")
+            }
             let probe = destination.appendingPathComponent(".stem-separator-probe-" + jobID.uuidString)
             do {
                 try FileManager.default.createDirectory(at: probe, withIntermediateDirectories: false)
@@ -33,11 +37,11 @@ struct SeparationSession: Sendable {
             phase = "preparing audio"
             let input = try AudioPreparationService.prepare(selection, directory: workspace, control: control)
             phase = "running separation engine"
-            let stems = try worker.run(input: input, jobID: jobID, directory: workspace, control: control, progress: progress)
+            let stems = try worker.run(input: input, jobID: jobID, directory: workspace, control: control, mode: mode, progress: progress)
             progress(.writing, nil)
             phase = "saving stems"
             let result = try StemOutputWriter.commit(stems: stems, input: input, workspace: workspace,
-                                                    destination: destination, baseName: selection.url.deletingPathExtension().lastPathComponent, control: control)
+                                                    destination: destination, baseName: selection.url.deletingPathExtension().lastPathComponent, control: control, mode: mode)
             log.info("Job completed in \(Int(Date().timeIntervalSince(start)), privacy: .public) seconds")
             return result
         } catch {

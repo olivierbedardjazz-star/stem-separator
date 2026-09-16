@@ -9,6 +9,7 @@ git rev-parse HEAD > build/CIProof/logs/source-sha.txt
 scripts/bootstrap_build_tools.sh > build/CIProof/logs/build-tools.log 2>&1
 scripts/build_stem_runtime.sh > build/CIProof/logs/runtime-build.log 2>&1
 python=build/StemRuntime/portable-venv/bin/python
+"$python" runtime/test_worker_backend.py > build/CIProof/logs/backend-tests.log 2>&1
 "$python" -m unittest discover -s Tests/Release > build/CIProof/logs/release-tests.log 2>&1
 "$python" - <<'PY'
 import subprocess,sys
@@ -16,7 +17,9 @@ from pathlib import Path
 worker='build/StemRuntime/dist/StemWorker.app/Contents/MacOS/StemWorker'
 for script in ['test_worker.py','test_worker_control.py']:
     with Path('build/CIProof/logs/'+script+'.log').open('w') as log:
-        subprocess.run([sys.executable,'runtime/'+script,worker],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=300)
+        subprocess.run([sys.executable,'runtime/'+script,worker]+(['--allow-unavailable'] if script=='test_worker.py' else []),stdout=log,stderr=subprocess.STDOUT,check=True,timeout=300)
+with Path('build/CIProof/logs/karaoke.log').open('w') as log:
+    subprocess.run([sys.executable,'runtime/test_worker.py',worker,'--karaoke','--allow-unavailable'],stdout=log,stderr=subprocess.STDOUT,check=True,timeout=300)
 PY
 build/BuildTools/xcodegen/bin/xcodegen generate > build/CIProof/logs/project-generation.log 2>&1
 git diff --exit-code -- TemplateApp.xcodeproj/project.pbxproj > build/CIProof/logs/project-drift.log

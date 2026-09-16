@@ -8,6 +8,8 @@ out.mkdir(parents=True,exist_ok=True)
 items=[]
 for dist in sorted(metadata.distributions(),key=lambda d:d.metadata['Name'].lower()):
     name=dist.metadata['Name']; version=dist.version
+    package_out=out/name
+    if package_out.exists(): shutil.rmtree(package_out)
     files=[]
     for file in dist.files or []:
         if any(t in file.name.lower() for t in ('license','licence','copying','notice','copyright')):

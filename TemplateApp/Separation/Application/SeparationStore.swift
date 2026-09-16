@@ -8,9 +8,11 @@ final class SeparationStore: ObservableObject {
     @Published private(set) var selection: AudioSelection?
     @Published private(set) var destination: URL?
     @Published private(set) var result: URL?
+    @Published private(set) var mode: SeparationMode = .stems
     @Published private(set) var stage: SeparationStage?
     @Published private(set) var progress: Double?
     @Published private(set) var message: String?
+    @Published private(set) var cleanupNotice: String?
     @Published private(set) var isInspecting = false
     @Published private(set) var isChoosingDestination = false
     @Published var isAuthorized = false
@@ -32,6 +34,12 @@ final class SeparationStore: ObservableObject {
             if let url = try? URL(resolvingBookmarkData: bookmark, options: [.withSecurityScope, .withoutUI], relativeTo: nil, bookmarkDataIsStale: &stale), !stale {
                 destination = url
             } else { defaults.removeObject(forKey: "stem-separator.v1.output-bookmark") }
+        }
+    }
+    func retryCleanup() {
+        Task { [weak self] in
+            let pending = await Task.detached(priority: .utility) { JobWorkspace.recover() }.value
+            self?.cleanupNotice = pending > 0 ? "Cleanup is pending. Reconnect output disks and check folder permissions; the app retries on launch and disk connection." : nil
         }
     }
     func chooseAudio() {
@@ -66,8 +74,8 @@ final class SeparationStore: ObservableObject {
     }
     static func presentOutputFolder(initial: URL?) async -> URL? {
         let panel = NSOpenPanel()
-        panel.title = "Choose where to save your stems"
-        panel.prompt = "Separate Stems"
+        panel.title = "Choose where to save your audio"
+        panel.prompt = "Save Here"
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
@@ -79,8 +87,9 @@ final class SeparationStore: ObservableObject {
             }
         }
     }
-    func start() {
+    func start(mode: SeparationMode = .stems) {
         guard canStart else { return }
+        retryCleanup()
         isChoosingDestination = true
         Task { [weak self] in
             guard let self else { return }
@@ -91,18 +100,19 @@ final class SeparationStore: ObservableObject {
             self.destination = folder
             let data = try? folder.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
             self.defaults.set(data, forKey: "stem-separator.v1.output-bookmark")
-            self.startJob(destination: folder)
+            self.startJob(destination: folder, mode: mode)
         }
     }
-    private func startJob(destination: URL) {
+    private func startJob(destination: URL, mode: SeparationMode) {
         guard canStart, let selection else { return }
         let id = UUID(), control = JobControl()
+        self.mode = mode
         self.jobID = id; self.control = control; stage = .preparing; progress = nil; result = nil; message = nil
         let session = SeparationSession(worker: StemWorkerProcess(executable: StemWorkerProcess.bundledExecutable))
         let store = self
         Task { [weak self] in
             let outcome = await Task.detached(priority: .userInitiated) {
-                Result { try session.run(selection: selection, destination: destination, jobID: id, control: control) { stage, progress in
+                Result { try session.run(selection: selection, destination: destination, jobID: id, control: control, mode: mode) { stage, progress in
                     Task { @MainActor in
                         guard store.jobID == id, store.stage != .cancelling else { return }
                         store.stage = stage; store.progress = progress
@@ -110,6 +120,7 @@ final class SeparationStore: ObservableObject {
                 } }
             }.value
             guard let self, self.jobID == id else { return }
+            self.retryCleanup()
             self.jobID = nil; self.control = nil; self.stage = nil; self.progress = nil
             switch outcome {
             case .success(let folder): self.result = folder; self.message = nil
@@ -124,7 +135,7 @@ final class SeparationStore: ObservableObject {
     }
     func reveal() {
         guard let result, FileManager.default.fileExists(atPath: result.path) else {
-            message = "The result folder was moved or removed."; return
+            message = "The result was moved or removed."; return
         }
         NSWorkspace.shared.activateFileViewerSelecting([result])
     }

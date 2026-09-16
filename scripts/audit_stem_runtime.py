@@ -41,7 +41,7 @@ def audit(app):
         deps = re.findall(r'cmd LC_(?:LOAD_DYLIB|LOAD_WEAK_DYLIB|REEXPORT_DYLIB|LOAD_UPWARD_DYLIB)\s+cmdsize \d+\s+name (.*?) \(offset', load)
         rpaths = re.findall(r'cmd LC_RPATH\s+cmdsize \d+\s+path (.*?) \(offset', load)
         minimum = re.findall(r'\bminos ([\d.]+)', load) + re.findall(r'cmd LC_VERSION_MIN_MACOSX\s+cmdsize \d+\s+version ([\d.]+)', load)
-        if not minimum or any(version(x) > version('14.0') for x in minimum):
+        if not minimum or any(version(x) > version('15.1') for x in minimum):
             failures.append('Unsupported or unknown minimum OS: ' + str(path.relative_to(app)))
         executable = 'EXECUTE' in run('otool', '-arch', 'arm64', '-hv', str(path))
         if executable:

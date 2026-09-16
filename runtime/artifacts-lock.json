@@ -194,17 +194,17 @@
     },
     {
       "name": "torch",
-      "version": "2.5.1",
-      "filename": "torch-2.5.1-cp311-none-macosx_11_0_arm64.whl",
-      "url": "https://files.pythonhosted.org/packages/d0/db/5d9cbfbc7968d79c5c09a0bc0bc3735da079f2fd07cc10498a62b320a480/torch-2.5.1-cp311-none-macosx_11_0_arm64.whl",
-      "sha256": "31f8c39660962f9ae4eeec995e3049b5492eb7360dd4f07377658ef4d728fa4c"
+      "version": "2.6.0",
+      "filename": "torch-2.6.0-cp311-none-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/0b/fa/f33a4148c6fb46ca2a3f8de39c24d473822d5774d652b66ed9b1214da5f7/torch-2.6.0-cp311-none-macosx_11_0_arm64.whl",
+      "sha256": "94fc63b3b4bedd327af588696559f68c264440e2503cc9e6954019473d74ae21"
     },
     {
       "name": "torchaudio",
-      "version": "2.5.1",
-      "filename": "torchaudio-2.5.1-cp311-cp311-macosx_11_0_arm64.whl",
-      "url": "https://files.pythonhosted.org/packages/6a/97/1780e3dd8733da30ff1051b8cbd8006e4824b76028558a58c31e790c09cd/torchaudio-2.5.1-cp311-cp311-macosx_11_0_arm64.whl",
-      "sha256": "7005354aa7dda9ef908e13c2566ee1fe0bd6d7f5bae0583b5e53016cd229fc34"
+      "version": "2.6.0",
+      "filename": "torchaudio-2.6.0-cp311-cp311-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/a9/30/bba293c8300245a09b7f82d3cfc04aee1950228da49c6cdd637d1145b6f5/torchaudio-2.6.0-cp311-cp311-macosx_11_0_arm64.whl",
+      "sha256": "c12fc41241b8dfce3ccc1917f1c81a0f92f532d9917706600046f1eb21d2d765"
     },
     {
       "name": "tqdm",

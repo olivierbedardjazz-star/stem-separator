@@ -15,4 +15,4 @@ exe = EXE(pyz, analysis.scripts, [], exclude_binaries=True, name='StemWorker',
     debug=False, strip=False, upx=False, console=True, target_arch='arm64')
 collection = COLLECT(exe, analysis.binaries, analysis.datas, strip=False, upx=False, name='StemWorker')
 app = BUNDLE(collection, name='StemWorker.app', bundle_identifier='com.oliviergrenierbedard.stemseparator.worker',
-    info_plist={'LSBackgroundOnly':True, 'LSMinimumSystemVersion':'14.0'})
+    info_plist={'LSBackgroundOnly':True, 'LSMinimumSystemVersion':'15.1'})

@@ -6,6 +6,7 @@ struct StemOutputPanelView: View {
     let canPerformPrimaryAction: Bool
     let onPrimaryAction: () -> Void
     @State private var preservingPrimaryPulse = false
+    @State private var preservingKaraokePulse = false
     private let icons = ["mic", "circle.grid.2x2.fill", "guitars", "pianokeys"]
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -25,6 +26,10 @@ struct StemOutputPanelView: View {
             }
             VStack(spacing: 20) {
                 separationActions
+                if let notice = store.cleanupNotice {
+                    Text(notice).font(AppTypography.ui(size: 11)).foregroundStyle(palette.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if store.stage != nil || store.message != nil || store.result != nil {
                     status.frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -35,10 +40,6 @@ struct StemOutputPanelView: View {
     }
     private var separationActions: some View {
         HStack(spacing: 12) {
-            if store.isBusy {
-                SecondaryActionButton(title: "Cancel", systemImage: nil, palette: palette) { store.cancel() }
-                    .disabled(store.stage == .cancelling)
-            }
             TemplatePrimaryActionButton(title: "Separate Stems", systemImage: nil, palette: palette) {
                 guard canPerformPrimaryAction else { return }
                 preservingPrimaryPulse = true
@@ -50,15 +51,28 @@ struct StemOutputPanelView: View {
             }
             .disabled(!canPerformPrimaryAction && !preservingPrimaryPulse)
             .allowsHitTesting(canPerformPrimaryAction)
+            TemplatePrimaryActionButton(title: "Create Karaoke", systemImage: nil, palette: palette) {
+                guard canPerformPrimaryAction else { return }
+                preservingKaraokePulse = true
+                store.start(mode: .karaoke)
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(AppMotion.shellBloomDuration))
+                    preservingKaraokePulse = false
+                }
+            }
+            .disabled(!canPerformPrimaryAction && !preservingKaraokePulse)
+            .allowsHitTesting(canPerformPrimaryAction)
         }
     }
     @ViewBuilder private var status: some View {
         if let stage = store.stage {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text(stage.title).font(AppTypography.ui(size: 13, weight: .semibold))
+                    Text(store.mode == .karaoke && stage == .separating ? "Creating karaoke…" : stage.title).font(AppTypography.ui(size: 13, weight: .semibold))
                     Spacer()
                     if let progress = store.progress { Text("\(Int(progress * 100))%").font(AppTypography.ui(size: 12)).monospacedDigit() }
+                    SecondaryActionButton(title: "Cancel", systemImage: nil, palette: palette) { store.cancel() }
+                        .disabled(stage == .cancelling)
                 }
                 if let progress = store.progress { ProgressView(value: progress).tint(palette.accentPrimary) }
                 else { ProgressView().controlSize(.small) }
@@ -69,7 +83,7 @@ struct StemOutputPanelView: View {
         } else if store.result != nil {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
-                    Label("Your four stems are ready", systemImage: "checkmark.circle.fill")
+                    Label(store.mode == .karaoke ? "Your karaoke track is ready" : "Your four stems are ready", systemImage: "checkmark.circle.fill")
                         .font(AppTypography.ui(size: 13, weight: .semibold)).foregroundStyle(palette.accentPrimary)
                 }
                 Spacer(minLength: 4)

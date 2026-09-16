@@ -39,8 +39,8 @@ retrying 1.4.2 — Apache-2.0
 setuptools 82.0.0 — MIT
 submitit 1.5.4 — Not declared
 sympy 1.13.1 — BSD
-torch 2.5.1 — BSD-3-Clause
-torchaudio 2.5.1 — Not declared
+torch 2.6.0 — BSD-3-Clause
+torchaudio 2.6.0 — Not declared
 tqdm 4.70.0 — MPL-2.0 AND MIT
 treetable 0.2.6 — Unlicense license
 typing_extensions 4.16.0 — PSF-2.0

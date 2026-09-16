@@ -1,5 +1,10 @@
 import Foundation
 
+enum SeparationMode: String, Sendable {
+    case stems, karaoke
+    var outputNames: [String] { self == .karaoke ? ["karaoke"] : ["vocals", "drums", "bass", "other"] }
+}
+
 struct AudioSelection: Sendable, Equatable {
     let url: URL
     let duration: Double
@@ -36,6 +41,8 @@ struct PreparedAudio: Sendable { let url: URL; let frames: Int }
 struct WorkerStem: Decodable, Sendable { let name: String; let file: String; let byteCount: Int }
 struct WorkerEvent: Decodable, Sendable {
     let protocolVersion: Int
+    let device: String?
+    let outputMode: String?
     let type: String
     let jobID: String?
     let sequence: Int?

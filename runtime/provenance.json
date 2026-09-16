@@ -17,12 +17,15 @@
     "sha256": "768f05cf200273bbdda9a5955a5a6892a4b22f2a0b1e4b0a9160f5c7fce86816"
   },
   "inference": {
-    "device": "cpu",
+    "device": "mps",
     "threads": 4,
     "shifts": 0,
     "segmentSeconds": 7.8,
     "overlap": 0.25,
-    "jobs": 1
+    "jobs": 1,
+    "minimumOS": "15.1",
+    "frameworkCPUFallback": false,
+    "spectralProcessing": "Demucs explicit CPU STFT/iSTFT; model forward passes on MPS"
   },
   "sourceCode": "runtime/worker/stem_worker.py",
   "packageVersions": "runtime/requirements-lock.txt",

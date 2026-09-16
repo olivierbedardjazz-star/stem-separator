@@ -4,7 +4,11 @@ import Darwin
 enum StemOutputWriter {
     static let names = ["vocals", "drums", "bass", "other"]
     static func commit(stems: [WorkerStem], input: PreparedAudio, workspace: URL, destination: URL,
-                       baseName: String, control: JobControl) throws -> URL {
+                       baseName: String, control: JobControl, mode: SeparationMode = .stems) throws -> URL {
+        guard stems.count == mode.outputNames.count, Set(stems.map(\.name)) == Set(mode.outputNames),
+              stems.allSatisfy({ $0.file == $0.name + ".f32le" && $0.byteCount == input.frames * 8 }) else {
+            throw SeparationFailure(message: "The engine returned an invalid output manifest.")
+        }
         let fm = FileManager.default
         let stage = destination.appendingPathComponent(".stem-separator-" + UUID().uuidString, isDirectory: true)
         try fm.createDirectory(at: stage, withIntermediateDirectories: false, attributes: [.posixPermissions: 0o700])
@@ -59,11 +63,12 @@ enum StemOutputWriter {
         let safe = String(baseName.replacingOccurrences(of: ":", with: "-").replacingOccurrences(of: "/", with: "-").prefix(100))
         for index in 1...10000 {
             try control.check()
-            let name = (safe.isEmpty ? "Audio" : safe) + " - Stems" + (index == 1 ? "" : " (\(index))")
-            let target = destination.appendingPathComponent(name, isDirectory: true)
+            let name = (safe.isEmpty ? "Audio" : safe) + (mode == .karaoke ? " - Karaoke" : " - Stems") + (index == 1 ? "" : " (\(index))") + (mode == .karaoke ? ".wav" : "")
+            let target = destination.appendingPathComponent(name, isDirectory: mode == .stems)
             // Same-volume atomic, exclusive rename: never replace another result, even in a race.
-            if renamex_np(stage.path, target.path, UInt32(RENAME_EXCL)) == 0 {
-                try? fm.removeItem(at: target.appendingPathComponent(".stem-separator-owner"))
+            let source = mode == .karaoke ? stage.appendingPathComponent("karaoke.wav") : stage
+            if renamex_np(source.path, target.path, UInt32(RENAME_EXCL)) == 0 {
+                if mode == .stems { try? fm.removeItem(at: target.appendingPathComponent(".stem-separator-owner")) }
                 return target
             }
             if errno != EEXIST { throw SeparationFailure(message: "Could not finish the output folder. Choose a writable local folder with enough free space.") }

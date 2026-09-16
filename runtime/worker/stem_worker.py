@@ -6,8 +6,11 @@ import os
 from pathlib import Path
 import sys
 import threading
+import platform
 import uuid
 
+# No implicit PyTorch operator fallback; Demucs explicitly handles spectral CPU transforms.
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '0'
 VERSION = 1
 MODEL_HASH = '8726e21a993978c7ba086d3872e7608d7d5bfca646ca4aca459ffda844faa8b4'
 MODEL_FILE = '955717e8-8726e21a.th'
@@ -37,21 +40,30 @@ def control():
             os._exit(10)
 
 class ProgressPool:
-    def __init__(self, total):
+    def __init__(self, total, synchronize):
         self.total, self.completed = total, 0
+        self.synchronize = synchronize
     def submit(self, fn, *args, **kwargs):
         owner = self
         class Deferred:
             def result(self):
                 result = fn(*args, **kwargs)
+                owner.synchronize()
                 owner.completed += 1
                 emit('progress', stage='separating', completedUnits=owner.completed, totalUnits=owner.total)
                 return result
         return Deferred()
 
+def output_tracks(sources, result, mode):
+    if mode == 'karaoke':
+        # Never serialize vocals or individual accompaniment stems in karaoke mode.
+        accompaniment = result[sources.index('drums')] + result[sources.index('bass')] + result[sources.index('other')]
+        return [('karaoke', accompaniment)]
+    return zip(sources, result)
+
 def main():
     global job_id
-    emit('ready', workerVersion='0.1.0', supportedCommands=['separate'])
+    emit('ready', workerVersion='0.1.2', supportedCommands=['separate'], device='mps')
     line = sys.stdin.buffer.readline(65537)
     if not line or len(line) > 65536:
         return 10
@@ -59,12 +71,15 @@ def main():
     job_id = str(uuid.UUID(request['jobID']))
     if request.get('protocolVersion') != VERSION or request.get('type') != 'separate':
         return 10
+    mode = request.get('outputMode', 'stems')
+    if mode not in ('stems', 'karaoke'):
+        return 10
     inp = request['input']
     frames = inp['frames']
     if (type(frames) is not int or not 0 < frames <= MAX_FRAMES or inp['channels'] != 2
         or inp['sampleRate'] != 44100 or inp['sampleType'] != 'float32-le'
         or inp['layout'] != 'interleaved' or inp['byteCount'] != frames * 8
-        or request.get('modelID') != 'htdemucs' or request.get('device') != 'cpu'):
+        or request.get('modelID') != 'htdemucs' or request.get('device') != 'mps'):
         return 10
     src = Path(inp['path'])
     dest = Path(request['outputDirectory'])
@@ -80,6 +95,9 @@ def main():
     # Imports happen after the ready handshake and under the parent-death watcher.
     import numpy as np
     import torch
+    if tuple(map(int, (platform.mac_ver()[0] or '0.0').split('.')[:2])) < (15, 1) or not torch.backends.mps.is_available():
+        emit('error', code='mpsUnavailable')
+        return 21
     from demucs.states import load_model
     from demucs.apply import apply_model
     torch.set_num_threads(min(4, os.cpu_count() or 1))
@@ -101,19 +119,19 @@ def main():
     emit('progress', stage='separating', completedUnits=0, totalUnits=total)
     with torch.inference_mode():
         result = apply_model(model, mix[None], shifts=0, split=True, overlap=0.25,
-                             segment=segment, device='cpu', num_workers=0,
-                             pool=ProgressPool(total))[0]
+                             segment=segment, device='mps', num_workers=0,
+                             pool=ProgressPool(total, torch.mps.synchronize))[0]
         result = result * (std + 1e-8) + mean
     if not torch.isfinite(result).all() or result.shape != (4, 2, frames):
         return 30
     emit('stage', stage='writing')
     dest.mkdir(mode=0o700)
     stems = []
-    for name, stem in zip(model.sources, result):
+    for name, stem in output_tracks(model.sources, result, mode):
         filename = name + '.f32le'
         stem.T.contiguous().numpy().astype('<f4', copy=False).tofile(dest / filename)
         stems.append(dict(name=name, file=filename, byteCount=frames * 8))
-    emit('result', frames=frames, channels=2, sampleRate=44100,
+    emit('result', device='mps', outputMode=mode, frames=frames, channels=2, sampleRate=44100,
          sampleType='float32-le', layout='interleaved', stems=stems)
     return 0
 

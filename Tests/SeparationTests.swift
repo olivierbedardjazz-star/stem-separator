@@ -1,5 +1,6 @@
 import AVFoundation
 import XCTest
+import Metal
 @testable import TemplateApp
 
 final class SeparationTests: XCTestCase {
@@ -62,6 +63,7 @@ final class SeparationTests: XCTestCase {
         XCTAssertThrowsError(try control.check())
     }
     func testBundledWorkerEndToEnd() throws {
+        try XCTSkipIf(MTLCreateSystemDefaultDevice() == nil, "Hosted machine has no Metal GPU; local bundled MPS proof required separately.")
         let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
         let source = try fixture(at: root, rate: 44100, channels: 2, seconds: 2)
         let selection = try AudioPreparationService.inspect(source)
@@ -73,6 +75,89 @@ final class SeparationTests: XCTestCase {
             XCTAssertEqual(audio.fileFormat.settings[AVLinearPCMBitDepthKey] as? Int, 24)
         }
     }
+    func testKaraokeBundledExportAndCleanup() throws {
+        try XCTSkipIf(MTLCreateSystemDefaultDevice() == nil, "MPS GPU required")
+        let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let source = try fixture(at: root, rate: 44100, channels: 2, seconds: 14)
+        let original = try Data(contentsOf: source)
+        let selection = try AudioPreparationService.inspect(source)
+        let session = SeparationSession(worker: StemWorkerProcess(executable: StemWorkerProcess.bundledExecutable))
+        for index in 1...2 {
+            let id = UUID()
+            let result = try session.run(selection: selection, destination: root, jobID: id, control: JobControl(), mode: .karaoke) { _, _ in }
+            XCTAssertEqual(result.lastPathComponent, source.deletingPathExtension().lastPathComponent + " - Karaoke" + (index == 1 ? "" : " (2)") + ".wav")
+            let audio = try AVAudioFile(forReading: result)
+            XCTAssertEqual(audio.length, 14 * 44100)
+            XCTAssertEqual(audio.fileFormat.settings[AVLinearPCMBitDepthKey] as? Int, 24)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: JobWorkspace.root.appendingPathComponent(id.uuidString).path))
+        }
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: root.path).count, 3)
+        XCTAssertEqual(try Data(contentsOf: source), original)
+    }
+    func testKaraokeRejectsStemManifestAndCorruptAudio() throws {
+        let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let input = PreparedAudio(url: root, frames: 1)
+        let wrong = [WorkerStem(name: "vocals", file: "vocals.f32le", byteCount: 8)]
+        XCTAssertThrowsError(try StemOutputWriter.commit(stems: wrong, input: input, workspace: root, destination: root, baseName: "Song", control: JobControl(), mode: .karaoke))
+        let worker = root.appendingPathComponent("worker-output")
+        try FileManager.default.createDirectory(at: worker, withIntermediateDirectories: false)
+        try Data([0]).write(to: worker.appendingPathComponent("karaoke.f32le"))
+        let manifest = [WorkerStem(name: "karaoke", file: "karaoke.f32le", byteCount: 8)]
+        XCTAssertThrowsError(try StemOutputWriter.commit(stems: manifest, input: input, workspace: root, destination: root, baseName: "Song", control: JobControl(), mode: .karaoke))
+        XCTAssertFalse(try FileManager.default.contentsOfDirectory(atPath: root.path).contains { $0.hasSuffix(".wav") || $0.hasPrefix(".stem-separator-") })
+    }
+    func testKaraokeCancellationCleansWorkspace() throws {
+        try XCTSkipIf(MTLCreateSystemDefaultDevice() == nil, "MPS GPU required")
+        let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
+        let source = try fixture(at: root, seconds: 14)
+        let control = JobControl(), id = UUID()
+        XCTAssertThrowsError(try SeparationSession(worker: StemWorkerProcess(executable: StemWorkerProcess.bundledExecutable))
+            .run(selection: AudioPreparationService.inspect(source), destination: root, jobID: id, control: control, mode: .karaoke) { stage, _ in
+                if stage == .separating { control.cancel() }
+            })
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: root.path), [source.lastPathComponent])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: JobWorkspace.root.appendingPathComponent(id.uuidString).path))
+    }
+    func testUnavailableDestinationRetainsMetadataButNoWorkingAudio() throws {
+        let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
+        var lease: JobWorkspace? = try JobWorkspace(id: UUID())
+        let workspace = lease!.url
+        defer { try? FileManager.default.removeItem(at: workspace) }
+        let destination = root.appendingPathComponent("external")
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: false)
+        let stage = destination.appendingPathComponent(".stem-separator-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: stage, withIntermediateDirectories: false)
+        try JobWorkspace.recordStaging(workspace: workspace, destination: destination, stage: stage)
+        try Data([1, 2, 3]).write(to: workspace.appendingPathComponent("input.f32le"))
+        try FileManager.default.removeItem(at: destination)
+        lease = nil
+        XCTAssertFalse(FileManager.default.fileExists(atPath: workspace.path))
+        let journal = JobWorkspace.journalRoot.appendingPathComponent(workspace.lastPathComponent)
+        defer { try? FileManager.default.removeItem(at: journal) }
+        JobWorkspace.recover()
+        XCTAssertTrue(FileManager.default.fileExists(atPath: journal.appendingPathComponent("staging.json").path))
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: false)
+        JobWorkspace.recover()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: workspace.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: journal.path))
+    }
+    func testDurableCleanupSurvivesTemporaryPurge() throws {
+        let destination = try directory(); defer { try? FileManager.default.removeItem(at: destination) }
+        let id = UUID().uuidString
+        let workspace = JobWorkspace.root.appendingPathComponent(id)
+        let journal = JobWorkspace.journalRoot.appendingPathComponent(id)
+        defer { try? FileManager.default.removeItem(at: workspace); try? FileManager.default.removeItem(at: journal) }
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        try Data("StemSeparatorJob-v1".utf8).write(to: workspace.appendingPathComponent(".owner"))
+        let stage = destination.appendingPathComponent(".stem-separator-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: stage, withIntermediateDirectories: false)
+        try JobWorkspace.recordStaging(workspace: workspace, destination: destination, stage: stage)
+        try Data([1, 2, 3]).write(to: stage.appendingPathComponent("partial.wav"))
+        try FileManager.default.removeItem(at: workspace)
+        JobWorkspace.recover()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: stage.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: journal.path))
+    }
     func testMissingWorkerFailsClearly() throws {
         let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
         XCTAssertThrowsError(try StemWorkerProcess(executable: root.appendingPathComponent("missing"))
@@ -81,6 +166,7 @@ final class SeparationTests: XCTestCase {
             }
     }
     func testBundledWorkerMultipleChunksAndSaving() throws {
+        try XCTSkipIf(MTLCreateSystemDefaultDevice() == nil, "Hosted machine has no Metal GPU; local bundled MPS proof required separately.")
         let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
         let selection = try AudioPreparationService.inspect(fixture(at: root, rate: 48000, channels: 2, seconds: 14))
         let result = try SeparationSession(worker: StemWorkerProcess(executable: StemWorkerProcess.bundledExecutable))
@@ -132,6 +218,7 @@ final class SeparationTests: XCTestCase {
         }
     }
     func testCancelRunningBundledJob() throws {
+        try XCTSkipIf(MTLCreateSystemDefaultDevice() == nil, "Hosted machine has no Metal GPU; local bundled MPS proof required separately.")
         let root = try directory(); defer { try? FileManager.default.removeItem(at: root) }
         let selection = try AudioPreparationService.inspect(fixture(at: root, seconds: 10))
         let control = JobControl()
@@ -219,7 +306,7 @@ final class SeparationTests: XCTestCase {
         store.accept([url])
         for _ in 0..<200 where store.isInspecting { try await Task.sleep(for: .milliseconds(10)) }
         XCTAssertTrue(store.canStart)
-        store.start()
+        store.start(mode: .karaoke)
         XCTAssertTrue(store.isChoosingDestination)
         XCTAssertFalse(store.canStart)
         XCTAssertFalse(store.canSelect)

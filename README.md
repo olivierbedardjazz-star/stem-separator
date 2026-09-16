@@ -2,11 +2,13 @@
 
 A free native macOS app that separates one audio file into vocals, drums, bass and other instruments (🎁 Surprise). Processing runs offline on your Mac. Python, Demucs and the four-stem HTDemucs model are bundled.
 
-Apple Silicon, macOS 14 or later. Inputs: WAV, AIFF, MP3 and unprotected M4A, mono or stereo, up to 20 minutes. Outputs: four 24-bit stereo WAV files at 44.1 kHz in a new folder inside your chosen destination. Your original audio remains unchanged.
+Development version 0.1.2 uses MPS model inference and requires Apple Silicon with macOS 15.1 or later. Internal 7.8-second chunking is retained; Demucs spectral transforms explicitly use CPU. Inputs: WAV, AIFF, MP3 and unprotected M4A, mono or stereo, up to 20 minutes. Outputs: four 24-bit stereo WAV files at 44.1 kHz in a new folder inside your chosen destination. Your original audio remains unchanged.
 
 Drop or choose audio, click **Separate Stems**, choose where to save, and reveal the result in Finder. Use audio you have permission to process.
 
 ## Release status
+
+The currently published 0.1.1 release uses CPU and supports macOS 14+. The MPS 0.1.2 candidate is local development work, not yet published or notarized.
 
 [Download the latest signed and notarized installer](https://github.com/olivierbedardjazz-star/stem-separator/releases/latest). Open the DMG and drag Stem Separator to Applications. The ZIP and signed appcast serve the built-in Sparkle updater; you do not need to download them.
 

@@ -1,4 +1,5 @@
 import Combine
+import AppKit
 import Foundation
 
 @MainActor
@@ -22,7 +23,11 @@ final class AppEnvironment: ObservableObject {
         AppLifecycleCoordinator.store = self.shellState
         bindSettingsState()
         self.commandDispatcher.handleAppLaunch()
-        Task.detached(priority: .utility) { JobWorkspace.recover() }
+        self.shellState.retryCleanup()
+        NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didMountNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.shellState.retryCleanup() }
+            .store(in: &cancellables)
     }
 
     private func bindSettingsState() {

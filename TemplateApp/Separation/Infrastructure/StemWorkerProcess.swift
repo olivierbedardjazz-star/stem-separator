@@ -6,7 +6,7 @@ struct StemWorkerProcess: Sendable {
     static var bundledExecutable: URL {
         Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/StemWorker.app/Contents/MacOS/StemWorker")
     }
-    func run(input: PreparedAudio, jobID: UUID, directory: URL, control: JobControl,
+    func run(input: PreparedAudio, jobID: UUID, directory: URL, control: JobControl, mode: SeparationMode = .stems,
              progress: @escaping @Sendable (SeparationStage, Double?) -> Void) throws -> [WorkerStem] {
         guard FileManager.default.isExecutableFile(atPath: executable.path) else {
             throw SeparationFailure(message: "The bundled separation engine is missing. Rebuild or reinstall Stem Separator.")
@@ -51,14 +51,14 @@ struct StemWorkerProcess: Sendable {
                     let event = try JSONDecoder().decode(WorkerEvent.self, from: line)
                     guard event.protocolVersion == 1 else { throw protocolFailure }
                     if !ready {
-                        guard event.type == "ready", event.jobID == nil else { throw protocolFailure }
+                        guard event.type == "ready", event.jobID == nil, event.device == "mps" else { throw protocolFailure }
                         ready = true
                         startupWatchdog.cancel()
                         let request: [String: Any] = ["protocolVersion": 1, "type": "separate", "jobID": jobID.uuidString.lowercased(),
                             "input": ["path": input.url.path, "frames": input.frames, "channels": 2, "sampleRate": 44100,
                                       "layout": "interleaved", "sampleType": "float32-le", "byteCount": input.frames * 8],
                             "outputDirectory": directory.appendingPathComponent("worker-output").path,
-                            "modelID": "htdemucs", "device": "cpu"]
+                            "modelID": "htdemucs", "device": "mps", "outputMode": mode.rawValue]
                         var data = try JSONSerialization.data(withJSONObject: request); data.append(10)
                         try stdin.fileHandleForWriting.write(contentsOf: data)
                         continue
@@ -73,13 +73,16 @@ struct StemWorkerProcess: Sendable {
                         guard let done = event.completedUnits, let total = event.totalUnits, total > 0, done >= 0, done <= total else { throw protocolFailure }
                         progress(.separating, Double(done) / Double(total))
                     case "result":
-                        guard event.frames == input.frames, event.channels == 2, event.sampleRate == 44100,
+                        guard event.outputMode == mode.rawValue, event.device == "mps", event.frames == input.frames, event.channels == 2, event.sampleRate == 44100,
                               event.sampleType == "float32-le", event.layout == "interleaved",
-                              let stems = event.stems, stems.count == 4,
-                              Set(stems.map(\.name)) == Set(["vocals", "drums", "bass", "other"]),
+                              let stems = event.stems, stems.count == mode.outputNames.count,
+                              Set(stems.map(\.name)) == Set(mode.outputNames),
                               stems.allSatisfy({ $0.file == $0.name + ".f32le" && $0.byteCount == input.frames * 8 }) else { throw protocolFailure }
                         result = stems
                     case "error":
+                        if event.code == "mpsUnavailable" {
+                            throw SeparationFailure(message: "GPU separation requires an available Apple Silicon GPU and macOS 15.1 or later.")
+                        }
                         throw SeparationFailure(message: event.code == "modelIntegrity" ? "The bundled model failed its integrity check. Rebuild or reinstall the app." : "The separation engine could not finish. Try a shorter audio file.")
                     default: throw protocolFailure
                     }
