@@ -7,7 +7,10 @@ python3 - <<'PY'
 import hashlib,json,os,re,urllib.request
 from pathlib import Path
 root=Path('build/PublishedProof');tag=os.environ['RELEASE_TAG'];repo='olivierbedardjazz-star/stem-separator'
-request=urllib.request.Request(f'https://api.github.com/repos/{repo}/releases/tags/{tag}',headers={'User-Agent':'StemSeparator-InstallProof'})
+headers={'User-Agent':'StemSeparator-InstallProof'}
+# Only metadata uses the ephemeral read-only Actions token. Asset downloads stay anonymous.
+if os.environ.get('GH_TOKEN'):headers['Authorization']='Bearer '+os.environ['GH_TOKEN']
+request=urllib.request.Request(f'https://api.github.com/repos/{repo}/releases/tags/{tag}',headers=headers)
 release=json.load(urllib.request.urlopen(request))
 assert release['tag_name']==tag and not release['draft'] and not release['prerelease']
 asset=next(a for a in release['assets'] if re.fullmatch(r'Stem-Separator-[0-9.]+-[0-9]+-arm64\.dmg',a['name']))

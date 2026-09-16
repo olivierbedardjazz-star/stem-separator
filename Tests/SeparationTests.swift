@@ -4,10 +4,24 @@ import Metal
 @testable import TemplateApp
 
 final class SeparationTests: XCTestCase {
+    private var fixtureDirectories: [URL] = []
+    override func tearDownWithError() throws {
+        // Direct writer tests use disposable destinations rather than leased workspaces.
+        // Their defer blocks remove those destinations; remove only their own metadata.
+        for directory in fixtureDirectories {
+            let journal = JobWorkspace.journalRoot.appendingPathComponent(directory.lastPathComponent)
+            if FileManager.default.fileExists(atPath: journal.path) {
+                try FileManager.default.removeItem(at: journal)
+            }
+        }
+        fixtureDirectories.removeAll()
+        try super.tearDownWithError()
+    }
     private func directory() throws -> URL {
         let base = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("build/Tests")
         let url = base.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        fixtureDirectories.append(url)
         return url
     }
     private func fixture(at root: URL, rate: Double = 48000, channels: AVAudioChannelCount = 1, seconds: Double = 0.3) throws -> URL {

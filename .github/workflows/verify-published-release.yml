@@ -23,6 +23,8 @@ jobs:
         with:
           persist-credentials: false
       - name: Download, assess and run the installed app
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: scripts/verify_published_installer.sh
       - name: Keep proof logs
         if: always()
