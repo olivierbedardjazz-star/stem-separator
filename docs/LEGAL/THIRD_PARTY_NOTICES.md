@@ -10,6 +10,8 @@ HTDemucs checkpoint 955717e8 is distributed under the historical MIT declaration
 
 Corresponding sources and library modification information are provided in RUNTIME_SOURCE_AND_RELINKING.md and the source archive alongside each release.
 
+The Mac App Store build replaces the Torch-wheel OpenMP binary with LLVM OpenMP 23.1.2 built from the pinned upstream source archive. LLVM OpenMP is Apache-2.0 WITH LLVM-exception; see LLVMOpenMP-LICENSE.txt and the bundled Store runtime provenance record. This replacement permits the sandboxed worker to start when macOS denies POSIX shared-memory registration. The direct-download build retains its original runtime.
+
 Build dependencies are included in this inventory as well as runtime dependencies. Packaging does not imply that every listed package is executed. Native libraries may have additional notices in the complete texts. See RUNTIME_SOURCE_AND_RELINKING.md for source availability and library modification information.
 
 altgraph 0.17.5 — MIT

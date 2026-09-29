@@ -15,18 +15,25 @@ struct AppLegalDocument: Identifiable {
 }
 
 enum AppLegalDocumentCatalog {
+    #if APP_STORE
+    private static let termsResource = "APP_STORE_TERMS"
+    private static let privacyResource = "APP_STORE_PRIVACY"
+    #else
+    private static let termsResource = "TEMPLATE_APP_TERMS"
+    private static let privacyResource = "TEMPLATE_APP_PRIVACY"
+    #endif
     static let documents: [AppLegalDocument] = [
         AppLegalDocument(
             id: .terms,
             label: "Terms",
             title: "Terms of Use",
-            body: loadMarkdown(named: "TEMPLATE_APP_TERMS")
+            body: loadMarkdown(named: termsResource)
         ),
         AppLegalDocument(
             id: .privacy,
             label: "Privacy",
             title: "Privacy Policy",
-            body: loadMarkdown(named: "TEMPLATE_APP_PRIVACY")
+            body: loadMarkdown(named: privacyResource)
         )
     ]
 
