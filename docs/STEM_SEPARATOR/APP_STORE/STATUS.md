@@ -1,6 +1,6 @@
 # Mac App Store handoff status — 2026-09-28
 
-The direct GitHub Developer ID/Sparkle 0.1.2 release has not been replaced. The Store variant is in pull request [#1](https://github.com/olivierbedardjazz-star/stem-separator/pull/1) from `codex/app-store`; do not describe it as submitted or public.
+The direct GitHub Developer ID/Sparkle 0.1.2 release has not been replaced. The Store variant was merged through [pull request #1](https://github.com/olivierbedardjazz-star/stem-separator/pull/1) into the one public source repository. Its [clean macOS 15 and 26 checks](https://github.com/olivierbedardjazz-star/stem-separator/actions/runs/36502198221) passed, including both distribution targets and a Store OpenMP load/start proof. Do not describe the Store variant as uploaded, submitted, or public in the Mac App Store.
 
 ## Proven locally
 
@@ -21,8 +21,8 @@ The Torch 2.6 wheel's bundled `libomp.dylib` aborted when App Sandbox denied its
 2. This Mac's Keychain currently shows only the Developer ID Application identity. No Apple Distribution app identity, Mac Installer Distribution identity, or Store provisioning profile was found. `scripts/app_store_release.py sign`, `export`, `validate`, and `upload` remain unproven and must not be claimed complete.
 3. App Store Connect has an existing Developer-role API key, but no Store submission credential was configured for this pipeline. Developer role may not permit App Review submission. Keep all `.p8` material outside the repository and owner-only readable.
 4. The Store listing still needs real accepted-dimension screenshots, pricing/availability, privacy declarations, age rating, review contact/notes, a processed build, and review submission. Privacy and support pages are prepared in this branch; use their stable public GitHub URLs only after merge.
-5. Clean GitHub Actions checks for PR #1 were pending when this status was written. Verify both macOS 15 and macOS 26 jobs before merge. Do not change the published direct-release assets as part of Store qualification.
+5. A new global `AGENTS.md` rule now requires Offstage for every local GUI action or Xcode test. `offstage route` classified `xcodebuild test` for the hidden session lane, but `offstage session status` reported `available: false`: no `computeruse` helper account or GUI session exists. The user must run `offstage session setup --create` and complete its sudo/macOS permission steps. Do not retry GUI testing through the visible desktop. A direct unit-test run begun before this rule arrived was interrupted; it is not a passing test result.
 
 ## Resume order
 
-Check PR #1 CI and resolve failures. After Account Holder agreement acceptance, check App Store Connect for an existing record; create only if absent. Obtain Store signing identities/profile through Apple-supported account/Xcode tooling. Run `scripts/app_store_release.py sign`, `verify-signed`, `export`, `validate`, then upload the tested package. Complete listing and submit. Poll Apple processing no longer than 15 minutes in one active turn; preserve build/submission IDs and resume later if it remains pending.
+After Account Holder agreement acceptance and Offstage setup, check App Store Connect for an existing record; create only if absent. Obtain Store signing identities/profile through Apple-supported account/Xcode tooling. Run remaining local GUI tests in Offstage, then `scripts/app_store_release.py sign`, `verify-signed`, `export`, `validate`, and upload the tested package. Complete listing and submit. Poll Apple processing no longer than 15 minutes in one active turn; preserve build/submission IDs and resume later if it remains pending.
