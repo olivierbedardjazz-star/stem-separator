@@ -33,6 +33,12 @@ assert info['CFBundleIdentifier'] == 'com.oliviergrenierbedard.stemseparator'
 assert not any(key.startswith('SU') for key in info)
 assert (root / 'Contents/Resources/APP_STORE_PRIVACY.md').exists()
 assert (root / 'Contents/Resources/APP_STORE_TERMS.md').exists()
+import ctypes
+openmp = ctypes.CDLL(str(lib.resolve()))
+openmp.omp_set_num_threads.argtypes = [ctypes.c_int]
+openmp.omp_set_num_threads(4)
+openmp.omp_get_max_threads.restype = ctypes.c_int
+assert openmp.omp_get_max_threads() == 4
 print('Store bundle, pin, and updater boundary verified')
 PY
 scripts/verify_bundled_notices.sh \
