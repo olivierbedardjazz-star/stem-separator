@@ -185,10 +185,12 @@ struct AppMenuCommands: Commands {
         }
 
         CommandGroup(replacing: .help) {
+            #if !APP_STORE
             Button("Check for Updates...") {
                 commandDispatcher.checkForUpdates()
             }
             .disabled(!commandDispatcher.canCheckForUpdates)
+            #endif
             Button("Third-Party Notices") { commandDispatcher.showNotices() }
         }
 

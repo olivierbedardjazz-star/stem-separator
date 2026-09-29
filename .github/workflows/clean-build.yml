@@ -29,6 +29,8 @@ jobs:
           persist-credentials: false
       - name: Reconstruct and prove offline runtime and native app
         run: scripts/ci_clean_proof.sh
+      - name: Build and inspect Mac App Store variant
+        run: scripts/ci_store_proof.sh
       - name: Retain diagnostic evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

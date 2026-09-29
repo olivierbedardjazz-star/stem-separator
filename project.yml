@@ -58,6 +58,56 @@ targets:
         basedOnDependencyAnalysis: false
     dependencies:
       - package: Sparkle
+  StemSeparatorAppStore:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.1"
+    sources:
+      - path: TemplateApp
+        excludes:
+          - Info.plist
+          - Info-AppStore.plist
+          - App/AppDownloadIntake.swift
+          - App/ProductionDebugLogger.swift
+          - App/AppUpdateCoordinator.swift
+          - Download/**
+          - Runtime/**
+          - RuntimeDependencies/**
+          - UI/Components/DownloadCompletionDialog.swift
+          - UI/Components/DownloadLanePanelView.swift
+          - UI/Components/DownloadStatusToast.swift
+          - UI/Components/DownloadURLSlotField.swift
+      - path: docs/LEGAL
+        excludes:
+          - TEMPLATE_APP_PRIVACY.md
+          - TEMPLATE_APP_TERMS.md
+          - RuntimeLicenses/**
+          - AppStore/**
+        buildPhase: resources
+      - path: docs/LEGAL/AppStore
+        buildPhase: resources
+      - path: docs/LEGAL/RuntimeLicenses
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGN_ENTITLEMENTS: Packaging/AppStore/StemSeparator.entitlements
+        INFOPLIST_FILE: TemplateApp/Info-AppStore.plist
+        SKIP_INSTALL: NO
+        PRODUCT_BUNDLE_IDENTIFIER: com.oliviergrenierbedard.stemseparator
+        PRODUCT_NAME: Stem Separator
+        PRODUCT_MODULE_NAME: TemplateApp
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+        SWIFT_EMIT_LOC_STRINGS: NO
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
+      configs:
+        Release:
+          ENABLE_HARDENED_RUNTIME: YES
+    postBuildScripts:
+      - name: Embed bundled separation runtime
+        script: '"$SRCROOT/scripts/embed_stem_runtime.sh"'
+        basedOnDependencyAnalysis: false
   StemSeparatorUITests:
     type: bundle.ui-testing
     platform: macOS
@@ -113,6 +163,10 @@ schemes:
       targets:
         - StemSeparatorTests
         - StemSeparatorUITests
+  StemSeparatorAppStore:
+    build:
+      targets:
+        StemSeparatorAppStore: all
   TemplateButtonOverlayRenderer:
     build:
       targets:

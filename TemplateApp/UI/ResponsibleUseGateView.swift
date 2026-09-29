@@ -24,7 +24,7 @@ struct ResponsibleUseGateView: View {
                         .foregroundStyle(palette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("This is a free local evaluation build. Model redistribution rights must be resolved before public release. Acceptance is stored only on this Mac.")
+                    Text("Stem Separator is free. Your choice to accept is stored only on this Mac.")
                         .font(AppTypography.ui(size: 13, weight: .semibold))
                         .foregroundStyle(palette.textMuted)
                 }
