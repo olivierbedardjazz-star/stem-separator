@@ -22,6 +22,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 DIRECT_CONFIG = json.loads((ROOT / "Packaging/release-config.json").read_text())
+STORE_CONFIG = json.loads((ROOT / "Packaging/AppStore/release-config.json").read_text())
 SCHEME = os.environ.get("APP_STORE_SCHEME", "StemSeparatorAppStore")
 RELEASE_ROOT = ROOT / "build/AppStoreRelease"
 
@@ -38,7 +39,10 @@ def project_version() -> tuple[str, str]:
         if not match:
             raise ReleaseError(f"{key} is missing from project.yml")
         values[key] = match.group(1)
-    return values["MARKETING_VERSION"], values["CURRENT_PROJECT_VERSION"]
+    store_build = str(STORE_CONFIG["buildNumber"])
+    if not store_build.isdigit() or int(store_build) <= int(values["CURRENT_PROJECT_VERSION"]):
+        raise ReleaseError("Store build number must be a positive integer above the direct build number")
+    return values["MARKETING_VERSION"], store_build
 
 
 def paths() -> tuple[Path, Path, Path]:
@@ -128,7 +132,8 @@ def archive() -> None:
     command = ["xcodebuild", "archive", "-project", DIRECT_CONFIG["project"],
                "-scheme", SCHEME, "-configuration", "Release",
                "-destination", "generic/platform=macOS", "-archivePath", archive_path,
-               "-derivedDataPath", root / "DerivedData", "CODE_SIGNING_ALLOWED=NO", "-quiet"]
+               "-derivedDataPath", root / "DerivedData", "CODE_SIGNING_ALLOWED=NO",
+               f"CURRENT_PROJECT_VERSION={project_version()[1]}", "-quiet"]
     run(*command)
     verify_archive()
 
@@ -182,6 +187,14 @@ def mach_o(path: Path) -> bool:
         return stream.read(4) in magic
 
 
+def standalone_mach_o_executable(path: Path) -> bool:
+    """Find MH_EXECUTE leaves that App Store validation requires to be sandboxed."""
+    with path.open("rb") as stream:
+        header = stream.read(16)
+    return (len(header) == 16 and header[:4] == b"\xcf\xfa\xed\xfe"
+            and int.from_bytes(header[12:16], "little") == 2)
+
+
 def sign_app(*, local: bool) -> None:
     verify_archive()
     root, archive_path, _ = paths()
@@ -212,9 +225,28 @@ def sign_app(*, local: bool) -> None:
     if not app_entitlements.is_file() or not helper_entitlements.is_file():
         raise ReleaseError("Store app and worker entitlement plists are required under Packaging/AppStore")
     app.parent.mkdir(parents=True, exist_ok=True)
+    if not local:
+        # The distribution profile authorizes this restricted macOS App ID.
+        # Keep the ad-hoc local-test entitlement file free of that claim.
+        signed_entitlements_path = app.parent / "StemSeparatorDistribution.entitlements"
+        claims = plistlib.loads(app_entitlements.read_bytes())
+        claims["com.apple.application-identifier"] = (
+            f"{DIRECT_CONFIG['teamID']}.{DIRECT_CONFIG['bundleID']}")
+        claims["com.apple.developer.team-identifier"] = DIRECT_CONFIG["teamID"]
+        signed_entitlements_path.write_bytes(plistlib.dumps(claims))
+        app_entitlements = signed_entitlements_path
     run("ditto", archive_path / "Products/Applications" / DIRECT_CONFIG["appName"], app)
     if profile:
         shutil.copyfile(profile, app / "Contents/embedded.provisionprofile")
+    # Safari marks downloaded profiles as quarantined, and ditto preserves
+    # extended attributes. Apple rejects any quarantine attribute in a Store
+    # package, including one on embedded.provisionprofile.
+    run("xattr", "-dr", "com.apple.quarantine", app)
+    # macOS's system Python does not expose os.listxattr on every version.
+    # Use the platform's xattr tool and check its recursive listing instead.
+    attributes = run("xattr", "-lr", app, capture=True)
+    if "com.apple.quarantine:" in attributes:
+        raise ReleaseError("Store app still contains quarantined files")
     helper = app / "Contents/Helpers/StemWorker.app"
     for path in app.rglob("*"):
         if path.is_symlink():
@@ -224,7 +256,12 @@ def sign_app(*, local: bool) -> None:
     signing_flags = [] if local else ["--timestamp", "--options", "runtime"]
     for leaf in sorted((p for p in app.rglob("*") if p.is_file() and not p.is_symlink() and mach_o(p)),
                        key=lambda p: len(p.parts), reverse=True):
-        run("codesign", "--force", *signing_flags, "--sign", identity, leaf)
+        # Torch ships command-line utilities outside a nested .app bundle.
+        # Apple validates those MH_EXECUTE files individually for App Sandbox.
+        leaf_entitlements = (["--entitlements", helper_entitlements]
+                             if standalone_mach_o_executable(leaf) else [])
+        run("codesign", "--force", *signing_flags, "--sign", identity,
+            *leaf_entitlements, leaf)
     bundles = [p for p in app.rglob("*") if p.is_dir() and not p.is_symlink()
                and p != helper and p.suffix in (".framework", ".app", ".xpc")]
     for bundle in sorted(bundles, key=lambda p: len(p.parts), reverse=True):
@@ -252,10 +289,19 @@ def verify_signatures(app: Path, *, require_team: bool) -> None:
         run("codesign", "--verify", "--deep", "--strict", item)
     for leaf in (p for p in app.rglob("*") if p.is_file() and not p.is_symlink() and mach_o(p)):
         run("codesign", "--verify", "--strict", leaf)
+        if standalone_mach_o_executable(leaf) and leaf not in (
+                app / "Contents/MacOS/Stem Separator",
+                helper / "Contents/MacOS/StemWorker"):
+            leaf_entitlements = signed_entitlements(leaf)
+            if leaf_entitlements.get("com.apple.security.app-sandbox") is not True:
+                raise ReleaseError(f"Standalone executable lacks App Sandbox: {leaf}")
     app_entitlements = signed_entitlements(app)
     helper_entitlements = signed_entitlements(helper)
     if app_entitlements.get("com.apple.security.app-sandbox") is not True:
         raise ReleaseError("Main Store app signature lacks App Sandbox")
+    if require_team and app_entitlements.get("com.apple.application-identifier") != (
+            f"{DIRECT_CONFIG['teamID']}.{DIRECT_CONFIG['bundleID']}"):
+        raise ReleaseError("Main Store app signature lacks the provisioned application identifier")
     if helper_entitlements.get("com.apple.security.app-sandbox") is not True:
         raise ReleaseError("StemWorker signature lacks App Sandbox")
     if helper_entitlements.get("com.apple.security.inherit") is not True:
@@ -303,28 +349,56 @@ def package() -> Path:
 
 def validate() -> None:
     pkg = package()
-    run("xcrun", "altool", "--validate-app", "-f", pkg, "-t", "macos",
-        *altool_flags())
+    result = subprocess.run(["xcrun", "altool", "--validate-app", "-f", str(pkg),
+                             "-t", "macos", *altool_flags()], cwd=ROOT,
+                            text=True, capture_output=True, check=False)
+    output = result.stdout + result.stderr
+    if result.returncode or re.search(r"(?im)(?:ERROR:|VERIFY FAILED|Validation failed|Failed to validate)", output):
+        raise ReleaseError(f"Apple rejected package validation:\n{output[-8000:]}")
+    if not re.search(r"(?i)(No errors[, ]|VERIFY SUCCEEDED|Validation succeeded|Successfully validated)", output):
+        raise ReleaseError(f"Apple validation returned no success confirmation:\n{output[-8000:]}")
     print(f"Apple validation accepted: {pkg}")
 
 
 def upload() -> None:
     pkg = package()
-    # Deliberately separate from validation: the operator can inspect the exact
-    # package and Apple validation result before initiating delivery.
-    run("xcrun", "altool", "--upload-app", "-f", pkg, "-t", "macos",
-        *altool_flags())
-    print("Upload delivered; Apple processing and build association remain to be checked.")
+    root, _, _ = paths()
+    receipt = root / "delivery.json"
+    if receipt.exists():
+        raise ReleaseError(f"Refusing to upload again with an existing delivery receipt: {receipt}")
+    result = subprocess.run(["xcrun", "altool", "--upload-app", "-f", str(pkg),
+                             "-t", "macos", *altool_flags()], cwd=ROOT,
+                            text=True, capture_output=True, check=False)
+    output = result.stdout + result.stderr
+    match = re.search(r"Delivery UUID:\s*([0-9a-fA-F-]{36})", output)
+    if result.returncode or "UPLOAD SUCCEEDED" not in output or not match:
+        raise ReleaseError(f"Apple did not confirm upload:\n{output[-8000:]}")
+    receipt.write_text(json.dumps({"deliveryId": match.group(1),
+                                   "version": project_version()[0],
+                                   "build": project_version()[1],
+                                   "package": str(pkg)}, indent=2) + "\n")
+    print(f"Upload delivered: {match.group(1)}. Apple processing remains to be checked.")
 
 
 def status() -> None:
-    apple_id = os.environ.get("ASC_APPLE_ID", "")
-    if not apple_id.isdigit():
-        raise ReleaseError("Set ASC_APPLE_ID to the numeric App Store Connect app ID")
-    version, build = project_version()
-    run("xcrun", "altool", "--build-status", "--apple-id", apple_id,
-        "--bundle-version", build, "--bundle-short-version-string", version,
-        "--platform", "macos", "--output-format", "json", *altool_flags())
+    root, _, _ = paths()
+    receipt = root / "delivery.json"
+    delivery_id = os.environ.get("ASC_DELIVERY_ID", "")
+    if not delivery_id and receipt.is_file():
+        delivery_id = json.loads(receipt.read_text())["deliveryId"]
+    if not re.fullmatch(r"[0-9a-fA-F-]{36}", delivery_id):
+        raise ReleaseError("Set ASC_DELIVERY_ID or run upload to create delivery.json")
+    # altool 26 can crash while serializing JSON status errors, so use normal
+    # text output and recognize FAILED even when altool exits with status 0.
+    result = subprocess.run(["xcrun", "altool", "--build-status", "--delivery-id",
+                             delivery_id, *altool_flags()], cwd=ROOT,
+                            text=True, capture_output=True, check=False)
+    output = result.stdout + result.stderr
+    if result.returncode or "BUILD-STATUS: FAILED" in output or "ERROR:" in output:
+        raise ReleaseError(f"Apple delivery failed or status is unavailable:\n{output[-8000:]}")
+    if "BUILD-STATUS:" not in output:
+        raise ReleaseError(f"Apple returned no build status:\n{output[-8000:]}")
+    print(output.strip())
 
 
 def main() -> None:
