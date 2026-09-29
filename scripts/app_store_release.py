@@ -25,6 +25,7 @@ DIRECT_CONFIG = json.loads((ROOT / "Packaging/release-config.json").read_text())
 STORE_CONFIG = json.loads((ROOT / "Packaging/AppStore/release-config.json").read_text())
 SCHEME = os.environ.get("APP_STORE_SCHEME", "StemSeparatorAppStore")
 RELEASE_ROOT = ROOT / "build/AppStoreRelease"
+LOCAL_SETTINGS = Path.home() / ".config/stem-separator/app-store-signing/release-settings.json"
 
 
 class ReleaseError(RuntimeError):
@@ -102,6 +103,26 @@ def altool_flags() -> list[str]:
             "--p8-file-path", xcode_flags[1]]
 
 
+def load_local_settings() -> None:
+    """Load identifiers and key paths, never private key material, for one-command delivery."""
+    path = Path(os.environ.get("MAS_RELEASE_SETTINGS", str(LOCAL_SETTINGS))).expanduser().resolve()
+    if not path.is_file() or path.is_relative_to(ROOT):
+        raise ReleaseError(f"Create an owner-only release settings JSON outside the repository: {path}")
+    if path.stat().st_mode & (stat.S_IRWXG | stat.S_IRWXO):
+        raise ReleaseError("Restrict release settings permissions to owner only (chmod 600)")
+    try:
+        settings = json.loads(path.read_text())
+    except (OSError, ValueError) as error:
+        raise ReleaseError(f"Cannot read release settings JSON: {error}") from error
+    required = ("MAS_APP_SIGN_IDENTITY", "MAS_INSTALLER_SIGN_IDENTITY", "MAS_PROVISION_PROFILE",
+                "ASC_KEY_ID", "ASC_ISSUER_ID", "ASC_P8_PATH")
+    if not isinstance(settings, dict) or any(not isinstance(settings.get(name), str)
+                                              or not settings[name].strip() for name in required):
+        raise ReleaseError(f"Release settings must contain nonempty values for: {', '.join(required)}")
+    for name in required:
+        os.environ.setdefault(name, settings[name])
+
+
 def preflight() -> None:
     require_tool("xcodebuild")
     require_tool("codesign")
@@ -115,7 +136,7 @@ def preflight() -> None:
     if not store_libomp.is_file():
         raise ReleaseError(f"Sandbox-compatible OpenMP runtime missing: {store_libomp}; run scripts/build_store_libomp.sh")
     print(f"Store source ready: {SCHEME}, {DIRECT_CONFIG['bundleID']}, {project_version()[0]} ({project_version()[1]})")
-    print("Signing availability and provisioning are proven only by archive/export.")
+    print("Preflight alone does not prove signing availability, provisioning, or Apple acceptance.")
 
 
 def archive() -> None:
@@ -195,6 +216,26 @@ def standalone_mach_o_executable(path: Path) -> bool:
             and int.from_bytes(header[12:16], "little") == 2)
 
 
+def require_store_profile() -> Path:
+    profile_path = os.environ.get("MAS_PROVISION_PROFILE", "")
+    if not profile_path:
+        raise ReleaseError("Set MAS_PROVISION_PROFILE to the local Mac App Store provisioning profile")
+    profile = Path(profile_path).expanduser().resolve()
+    if not profile.is_file() or profile.is_relative_to(ROOT):
+        raise ReleaseError("Provisioning profile must be an existing local file outside this repository")
+    profile_data = plistlib.loads(run("security", "cms", "-D", "-i", profile, capture=True).encode())
+    if DIRECT_CONFIG["teamID"] not in profile_data.get("TeamIdentifier", []):
+        raise ReleaseError("Mac App Store provisioning profile belongs to a different team")
+    profile_app_id = profile_data.get("Entitlements", {}).get("com.apple.application-identifier")
+    expected_app_id = f"{DIRECT_CONFIG['teamID']}.{DIRECT_CONFIG['bundleID']}"
+    if profile_app_id != expected_app_id:
+        raise ReleaseError(f"Provisioning profile is not for {DIRECT_CONFIG['bundleID']}")
+    expiration = profile_data.get("ExpirationDate")
+    if isinstance(expiration, datetime) and expiration.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
+        raise ReleaseError("Mac App Store provisioning profile has expired")
+    return profile
+
+
 def sign_app(*, local: bool) -> None:
     verify_archive()
     root, archive_path, _ = paths()
@@ -202,24 +243,7 @@ def sign_app(*, local: bool) -> None:
     if app.exists():
         raise ReleaseError(f"Refusing to replace an existing signed Store app: {app}")
     identity = "-" if local else signing_identity("MAS_APP_SIGN_IDENTITY", "Apple Distribution", code=True)
-    profile = None
-    if not local:
-        profile_path = os.environ.get("MAS_PROVISION_PROFILE", "")
-        if not profile_path:
-            raise ReleaseError("Set MAS_PROVISION_PROFILE to the local Mac App Store provisioning profile")
-        profile = Path(profile_path).expanduser().resolve()
-        if not profile.is_file() or profile.is_relative_to(ROOT):
-            raise ReleaseError("Provisioning profile must be an existing local file outside this repository")
-        profile_data = plistlib.loads(run("security", "cms", "-D", "-i", profile, capture=True).encode())
-        if DIRECT_CONFIG["teamID"] not in profile_data.get("TeamIdentifier", []):
-            raise ReleaseError("Mac App Store provisioning profile belongs to a different team")
-        profile_app_id = profile_data.get("Entitlements", {}).get("com.apple.application-identifier")
-        expected_app_id = f"{DIRECT_CONFIG['teamID']}.{DIRECT_CONFIG['bundleID']}"
-        if profile_app_id != expected_app_id:
-            raise ReleaseError(f"Provisioning profile is not for {DIRECT_CONFIG['bundleID']}")
-        expiration = profile_data.get("ExpirationDate")
-        if isinstance(expiration, datetime) and expiration.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc):
-            raise ReleaseError("Mac App Store provisioning profile has expired")
+    profile = None if local else require_store_profile()
     app_entitlements = ROOT / "Packaging/AppStore/StemSeparator.entitlements"
     helper_entitlements = ROOT / "Packaging/AppStore/StemWorker.entitlements"
     if not app_entitlements.is_file() or not helper_entitlements.is_file():
@@ -401,11 +425,37 @@ def status() -> None:
     print(output.strip())
 
 
+def check_delivery() -> None:
+    """Fail before building if this version or its signing inputs cannot be delivered."""
+    load_local_settings()
+    preflight()
+    signing_identity("MAS_APP_SIGN_IDENTITY", "Apple Distribution", code=True)
+    signing_identity("MAS_INSTALLER_SIGN_IDENTITY", "Mac Installer Distribution", code=False)
+    require_store_profile()
+    altool_flags()
+    root, _, _ = paths()
+    if root.exists():
+        raise ReleaseError(f"Store build already exists or was delivered: {root}; increment the Store build number")
+    print("Delivery inputs are ready. This check did not build or upload anything.")
+
+
+def deliver() -> None:
+    """One command for archive → sign → package → validate → upload → one status check."""
+    check_delivery()
+    archive()
+    sign()
+    export()
+    validate()
+    upload()
+    status()
+    print("Binary delivered. App Store Connect metadata, build association, and App Review are separate gates.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("preflight", "archive", "verify-archive",
                                             "sign-local", "verify-local", "sign", "verify-signed", "export", "validate",
-                                            "upload", "status"))
+                                            "upload", "status", "check-delivery", "deliver"))
     command = parser.parse_args().command
     try:
         globals()[command.replace("-", "_")]()

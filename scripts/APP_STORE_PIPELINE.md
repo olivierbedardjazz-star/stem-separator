@@ -4,7 +4,17 @@ This path is separate from `scripts/RELEASE_PIPELINE.md`. The repository, `proje
 
 ## Current implementation
 
-`scripts/app_store_release.py` has explicit, fail-closed commands. It never creates an App Store Connect app record, uploads without the `upload` command, or submits for App Review. The first Store submission still needs a real sandbox workflow proof, Apple Distribution credentials/provisioning, a signed package, completed metadata, and Apple processing. The local `sign-local` option is for sandbox testing only and cannot produce a distributable package.
+`scripts/app_store_release.py` has explicit, fail-closed commands. It never creates an App Store Connect app record or submits for App Review. The Store binary was first submitted as version 0.1.2 (103); see `docs/STEM_SEPARATOR/APP_STORE/STATUS.md` for its review state. The local `sign-local` option is for sandbox testing only and cannot produce a distributable package.
+
+For a **future update on the already provisioned Mac**, one terminal command runs archive → sign → package → Apple validation → upload → one Apple processing-status check:
+
+```sh
+cd /Users/oliviergrenierbedard/Desktop/My_Musical_Brain/STEM_SEPARATOR && python3 scripts/app_store_release.py deliver
+```
+
+Before running it, update the marketing version in `project.yml` when releasing a new user-visible version, increment `Packaging/AppStore/release-config.json` to an unused Store build number, test the changed app locally, and commit the source. The command requires the prebuilt bundled worker and Store OpenMP runtime on this Mac. It reads signing identity names, the app-specific profile path, and the App Store Connect API key **path** from the owner-only `~/.config/stem-separator/app-store-signing/release-settings.json`; the private key bytes remain in the separate `.p8` file and Keychain. Run `python3 scripts/app_store_release.py check-delivery` for a no-build/no-upload readiness check. The command refuses to overwrite an existing archive or re-upload a recorded delivery; version 0.1.2 (103) is already delivered and will correctly fail this check.
+
+`deliver` handles the **binary**, not a complete storefront release. After Apple processing, the new build still needs to be associated with its version, metadata/asset changes reviewed, and a review submission created. Apple's App Store Connect API supports those steps, but this repository has not yet implemented or tested that metadata/review API client. The existing team API key has Developer role; Apple lists Account Holder, Admin, or App Manager for App Review submission. Never treat a binary upload or `BUILD-STATUS: VALID` as App Review submission or publication.
 
 Prerequisites: current Xcode, XcodeGen (`build/BuildTools/xcodegen/bin/xcodegen` or on `PATH`), the frozen worker from `scripts/build_stem_runtime.sh`, the pinned sandbox-compatible OpenMP library from `scripts/build_store_libomp.sh`, and the `StemSeparatorAppStore` target/scheme. The OpenMP source archive is verified by SHA-256 and rebuilt for arm64/macOS 15.1; it replaces only the Store helper's `libomp.dylib`. Store app and worker entitlements live at `Packaging/AppStore/StemSeparator.entitlements` and `Packaging/AppStore/StemWorker.entitlements`.
 
