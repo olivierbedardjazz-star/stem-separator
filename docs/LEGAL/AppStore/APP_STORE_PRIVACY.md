@@ -5,7 +5,7 @@ Updated: September 28, 2026
 Owner: Olivier Grenier Bedard
 Contact: info.mymusicalbrain@gmail.com
 
-Audio processing runs on your Mac. Stem Separator does not upload your audio or stems, require an account, charge payments, or include advertising or analytics. Python, Demucs, the model, and required libraries are bundled. Separation does not need an internet connection.
+Audio processing runs on your Mac. Stem Separator does not upload your audio or stems, require an account, charge payments, or include ad tracking or analytics. It does display optional links promoting other My Musical Brain products. Python, Demucs, the model, and required libraries are bundled. Separation does not need an internet connection.
 
 Local settings store the selected theme, responsible-use acceptance version, and a bookmark for the output folder. Source audio is not saved as history. Temporary decoded audio and intermediate stems are written to an app-owned temporary workspace during processing and removed when the job finishes or is cancelled. A crash or force quit may leave temporary files until recovery or macOS cleanup. Completed output files remain in your chosen folder until you remove them.
 

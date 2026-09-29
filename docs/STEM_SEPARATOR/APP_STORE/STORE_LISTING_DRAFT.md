@@ -22,12 +22,12 @@ Source checks: `README.md`; `project.yml`; `TemplateApp/Info.plist`; `TemplateAp
 | Bundle ID | `com.oliviergrenierbedard.stemseparator`; must match the Store app record and signed build. |
 | Primary category | Music. No secondary category proposed. |
 | Price | Free. No In-App Purchases or subscriptions. Set Free pricing and intended storefront availability in App Store Connect. |
-| Primary language | English (draft; choose exact English locale when creating record). |
+| Primary language | English (U.S.) selected in the attempted App Store Connect record creation. |
 | Keywords | `vocals,drums,bass,karaoke,audio,music,separation,wav` (under 100 UTF-8 bytes; do not repeat app name, company, or competitors). |
 | Promotional text | Optional; omit for first submission unless needed. |
 | Copyright | `2026 Olivier Grenier-Bedard` (confirm the exact legal holder; Apple adds the copyright symbol). |
-| Privacy Policy URL | **TBD:** publish a Store-accurate policy at a stable HTTPS URL, then verify it anonymously before entry. Do not point the Store listing at the current direct-build policy, which describes Sparkle update checks. |
-| Support URL | **TBD:** publish a stable HTTPS support page containing at least the support email and useful contact guidance; verify anonymous access. Existing README includes `info.mymusicalbrain@gmail.com`, but a dedicated support page is clearer. |
+| Privacy Policy URL | After merging this branch, use `https://github.com/olivierbedardjazz-star/stem-separator/blob/main/docs/LEGAL/AppStore/APP_STORE_PRIVACY.md`; verify anonymous access before entry. |
+| Support URL | After merging this branch, use `https://github.com/olivierbedardjazz-star/stem-separator/blob/main/docs/STEM_SEPARATOR/APP_STORE/SUPPORT.md`; verify anonymous access before entry. |
 | Marketing URL | Optional; public repository or a dedicated product page, if its claims accurately describe the Store variant. |
 | Version | Use the actual Store build's `CFBundleShortVersionString`; never reuse an already uploaded bundle ID/version/build combination. First Store listing's “What's New” field is unavailable; add change notes for later versions. |
 | Age rating | Complete Apple's current questionnaire truthfully. Do not guess a numerical rating. The app does not embed a social feed or broad web browser; opening optional external links alone should be classified according to Apple's actual questionnaire wording. |
